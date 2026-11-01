@@ -114,58 +114,61 @@ jobs:
       - name: Make Gradle Wrapper Executable
         run: chmod +x android/gradlew
 
-      - name: Build Android APK & AAB
+      - name: Build Release APK
         run: |
           cd android
-          ./gradlew assembleDebug assembleRelease bundleRelease --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Package Artifacts as Royal-Dream-Match.apk
+      - name: Build Release AAB
+        run: |
+          cd android
+          ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Package Artifacts
         run: |
           mkdir -p build-artifacts
-          
-          # Find and copy release APK
-          if [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/Royal-Dream-Match.apk
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/Royal-Dream-Match-release.apk
-          elif [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+
+          # Locate and copy APK to Royal-Dream-Match.apk
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
             cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/Royal-Dream-Match.apk
+          elif [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/Royal-Dream-Match.apk
+          elif [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Royal-Dream-Match.apk
           fi
 
-          # Find and copy debug APK
-          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Royal-Dream-Match-debug.apk
-            # Ensure Royal-Dream-Match.apk exists
-            if [ ! -f build-artifacts/Royal-Dream-Match.apk ]; then
-              cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Royal-Dream-Match.apk
-            fi
-          fi
-
-          # Copy Google Play AAB bundle if generated
+          # Locate and copy AAB to Royal-Dream-Match.aab
           if [ -f android/app/build/outputs/bundle/release/app-release.aab ]; then
             cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/Royal-Dream-Match.aab
+          elif [ -f android/app/build/outputs/bundle/release/app-release-unsigned.aab ]; then
+            cp android/app/build/outputs/bundle/release/app-release-unsigned.aab build-artifacts/Royal-Dream-Match.aab
           fi
 
-          echo "Generated Artifacts:"
+          echo "Generated build artifacts:"
           ls -la build-artifacts/
 
-      - name: Upload APK Artifacts
+      - name: Upload Royal-Dream-Match.apk Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Royal-Dream-Match-APK
-          path: |
-            build-artifacts/*.apk
-            build-artifacts/*.aab
+          name: Royal-Dream-Match.apk
+          path: build-artifacts/Royal-Dream-Match.apk
           retention-days: 30
 
-      - name: Automatic GitHub Release with APK
+      - name: Upload Royal-Dream-Match.aab Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Royal-Dream-Match.aab
+          path: build-artifacts/Royal-Dream-Match.aab
+          retention-days: 30
+
+      - name: Automatic GitHub Release with APK & AAB
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         continue-on-error: true
         with:
           files: |
             build-artifacts/Royal-Dream-Match.apk
-            build-artifacts/*.apk
-            build-artifacts/*.aab
+            build-artifacts/Royal-Dream-Match.aab
           name: Royal Dream Match ${{ github.ref_name || 'v1.0.0' }}
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.0' }}
           body: |
