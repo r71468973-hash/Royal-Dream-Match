@@ -42,19 +42,34 @@ export const ApkDownloadModal: React.FC<ApkDownloadModalProps> = ({ onClose }) =
           <div className="inline-block px-3 py-0.5 rounded-full bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-[10px] font-black uppercase tracking-wider mb-1">
             Android APK & AAB
           </div>
-          <h3
-            className="text-xl font-black text-white"
-            style={{ fontFamily: "'Fredoka', sans-serif" }}
-          >
-            Download Royal Dream Match
-          </h3>
-          <p className="text-xs text-blue-200 mt-0.5">
-            Playable Android build with AdMob & Capacitor
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <img 
+              src="/icon.png" 
+              alt="Royal Dream Match Icon" 
+              className="w-10 h-10 rounded-xl shadow-md border-2 border-yellow-400"
+            />
+            <h3
+              className="text-xl font-black text-white"
+              style={{ fontFamily: "'Fredoka', sans-serif" }}
+            >
+              Royal-Dream-Match.apk
+            </h3>
+          </div>
+          <p className="text-xs text-blue-200">
+            Playable Android build with custom crown launcher icon & AdMob
           </p>
         </div>
 
         {/* Technical Specs Card */}
         <div className="bg-blue-950/80 rounded-2xl p-3 border border-yellow-400/30 flex flex-col gap-1.5 text-xs mb-3">
+          <div className="flex justify-between items-center py-0.5 border-b border-blue-800/60">
+            <span className="text-blue-300 font-medium">Output APK:</span>
+            <span className="font-mono font-bold text-yellow-300">Royal-Dream-Match.apk</span>
+          </div>
+          <div className="flex justify-between items-center py-0.5 border-b border-blue-800/60">
+            <span className="text-blue-300 font-medium">Launcher Icon:</span>
+            <span className="font-bold text-amber-300">Crown + Gems (512x512)</span>
+          </div>
           <div className="flex justify-between items-center py-0.5 border-b border-blue-800/60">
             <span className="text-blue-300 font-medium">Package Name:</span>
             <span className="font-mono font-bold text-yellow-300">com.royaldream.match</span>

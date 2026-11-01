@@ -1,4 +1,4 @@
-name: Build Android APK and AAB
+name: Build Android APK (Royal Dream Match)
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       create_release:
         description: 'Publish as GitHub Release'
         required: false
-        default: 'false'
+        default: 'true'
         type: boolean
 
 permissions:
@@ -20,28 +20,36 @@ permissions:
 
 jobs:
   build:
-    name: Build APK and AAB
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
           cache: 'gradle'
 
-      - name: Set up Node.js 22
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: 22
 
-      - name: Install Dependencies
-        run: npm ci || npm install
+      - name: Safely Install Node Dependencies
+        run: |
+          echo "Installing dependencies with Node $(node -v) and npm $(npm -v)..."
+          if [ -f package-lock.json ]; then
+            npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+          else
+            npm install --legacy-peer-deps
+          fi
 
       - name: Build Web Application
         run: npm run build
@@ -52,46 +60,73 @@ jobs:
       - name: Make Gradle Wrapper Executable
         run: chmod +x android/gradlew
 
-      - name: Build Debug APK
+      - name: Build Android APK & AAB
         run: |
           cd android
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug assembleRelease bundleRelease --stacktrace
 
-      - name: Build Release APK and AAB
-        run: |
-          cd android
-          ./gradlew assembleRelease bundleRelease --stacktrace
-
-      - name: Rename Artifacts for Convenience
+      - name: Package Artifacts as Royal-Dream-Match.apk
         run: |
           mkdir -p build-artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/RoyalDreamMatch-v1.0-debug.apk || true
-          cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/RoyalDreamMatch-v1.0-release.apk || true
-          cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/RoyalDreamMatch-v1.0.aab || true
+          
+          # Find and copy release APK
+          if [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/Royal-Dream-Match.apk
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/Royal-Dream-Match-release.apk
+          elif [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk build-artifacts/Royal-Dream-Match.apk
+          fi
 
-      - name: Upload APK & AAB Artifacts
+          # Find and copy debug APK
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Royal-Dream-Match-debug.apk
+            # Ensure Royal-Dream-Match.apk exists
+            if [ ! -f build-artifacts/Royal-Dream-Match.apk ]; then
+              cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/Royal-Dream-Match.apk
+            fi
+          fi
+
+          # Copy Google Play AAB bundle if generated
+          if [ -f android/app/build/outputs/bundle/release/app-release.aab ]; then
+            cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/Royal-Dream-Match.aab
+          fi
+
+          echo "Generated Artifacts:"
+          ls -la build-artifacts/
+
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: RoyalDreamMatch-Android-Build
+          name: Royal-Dream-Match-APK
           path: |
             build-artifacts/*.apk
             build-artifacts/*.aab
           retention-days: 30
 
-      - name: Create Automatic GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
+      - name: Automatic GitHub Release with APK
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           files: |
+            build-artifacts/Royal-Dream-Match.apk
             build-artifacts/*.apk
             build-artifacts/*.aab
-          name: Royal Dream Match Release ${{ github.ref_name }}
+          name: Royal Dream Match ${{ github.ref_name || 'v1.0.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.0' }}
           body: |
-            ### Royal Dream Match Android Release
+            ## 👑 Royal Dream Match Android APK
+            
+            - **APK File**: `Royal-Dream-Match.apk`
             - **Package Name**: `com.royaldream.match`
             - **Version**: `1.0.0`
-            - **Built with**: Node.js 22 & Java 21
-            - **Google AdMob**: Configured (Banner, Interstitial, Rewarded)
+            - **Launcher Icon**: 👑 Golden Royal Crown with Match-3 Jewels (512x512 adaptive icon)
+            - **Built with**: Node.js 22 LTS, Java 21, and Capacitor Android
+            
+            ### Installation:
+            1. Download `Royal-Dream-Match.apk`
+            2. Tap to install on your Android device
+            3. Enjoy Royal Dream Match with full audio, 100 levels, and custom launcher icon!
           draft: false
           prerelease: false
         env:
