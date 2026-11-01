@@ -33,28 +33,34 @@ export interface AdMobConfig {
   };
 }
 
+const envAppId = (import.meta.env.VITE_ADMOB_APP_ID as string) || '';
+const envBannerId = (import.meta.env.VITE_ADMOB_BANNER_ID as string) || '';
+const envInterstitialId = (import.meta.env.VITE_ADMOB_INTERSTITIAL_ID as string) || '';
+const envRewardedId = (import.meta.env.VITE_ADMOB_REWARDED_ID as string) || '';
+const envTestMode = import.meta.env.VITE_ADMOB_TEST_MODE === 'false' ? false : (envBannerId ? false : true);
+
 // Official Google AdMob Test Ad Unit IDs (Google Sample IDs)
 export const DEFAULT_ADMOB_CONFIG: AdMobConfig = {
-  testMode: true,
+  testMode: envTestMode,
   appId: {
-    android: 'ca-app-pub-3940256099942544~3347511713',
+    android: envAppId || 'ca-app-pub-3940256099942544~3347511713',
     ios: 'ca-app-pub-3940256099942544~1458002511',
   },
   banner: {
-    android: 'ca-app-pub-3940256099942544/6300978111',
+    android: envBannerId || 'ca-app-pub-3940256099942544/6300978111',
     ios: 'ca-app-pub-3940256099942544/2934735716',
   },
   interstitial: {
-    android: 'ca-app-pub-3940256099942544/1033173712',
+    android: envInterstitialId || 'ca-app-pub-3940256099942544/1033173712',
     ios: 'ca-app-pub-3940256099942544/4411468910',
   },
   rewarded: {
-    android: 'ca-app-pub-3940256099942544/5224354917',
+    android: envRewardedId || 'ca-app-pub-3940256099942544/5224354917',
     ios: 'ca-app-pub-3940256099942544/1712485313',
   },
   options: {
     bannerPosition: 'bottom',
-    interstitialCooldownSeconds: 60, // 60s cooldown to prevent policy violations
+    interstitialCooldownSeconds: 60, // 60s cooldown to comply with AdMob policy
     showBannerOnHome: true,
     showBannerOnMap: true,
     showBannerOnGame: false, // Keep puzzle board unobstructed for optimum UX & avoid invalid clicks

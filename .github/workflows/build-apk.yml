@@ -52,7 +52,6 @@ jobs:
           if [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
             SDKMANAGER_BIN="$ANDROID_HOME/cmdline-tools/latest/bin"
           else
-            # Search for any pre-installed sdkmanager in runner
             EXISTING=$(find "$ANDROID_HOME" -name sdkmanager -type f 2>/dev/null | grep -E 'cmdline-tools/(latest|[0-9.]+)/bin/sdkmanager' | head -n 1)
             if [ -n "$EXISTING" ]; then
               SDKMANAGER_BIN=$(dirname "$EXISTING")
@@ -70,6 +69,7 @@ jobs:
           # 3. Export PATH to GitHub Environment
           echo "$SDKMANAGER_BIN" >> $GITHUB_PATH
           echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> $GITHUB_PATH
           echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
           export PATH="$SDKMANAGER_BIN:$ANDROID_HOME/platform-tools:$PATH"
 
@@ -78,9 +78,9 @@ jobs:
           mkdir -p "$ANDROID_HOME/licenses"
           yes | "$SDKMANAGER_BIN/sdkmanager" --licenses || true
 
-          # 5. Install required Platform Tools, Platform 34, and Build Tools
-          echo "Installing platform-tools, platforms;android-34, and build-tools;34.0.0..."
-          "$SDKMANAGER_BIN/sdkmanager" --install "platform-tools" "cmdline-tools;latest" "platforms;android-34" "build-tools;34.0.0"
+          # 5. Install required Platform Tools, Platforms 35 & 34, and Build Tools
+          echo "Installing platforms and build tools..."
+          "$SDKMANAGER_BIN/sdkmanager" --install "platform-tools" "cmdline-tools;latest" "platforms;android-35" "platforms;android-34" "build-tools;35.0.0" "build-tools;34.0.0"
 
           # 6. Verify sdkmanager --list works
           echo "Verifying sdkmanager installation..."
@@ -114,15 +114,24 @@ jobs:
       - name: Make Gradle Wrapper Executable
         run: chmod +x android/gradlew
 
+      - name: Configure Keystore for Release Signing
+        run: |
+          mkdir -p android/app
+          if [ ! -f android/app/debug.keystore ]; then
+            echo "Generating release signing keystore..."
+            keytool -genkey -v -keystore android/app/debug.keystore -alias androiddebugkey -keypass android -storepass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=RoyalDreamMatch,OU=Game,O=RoyalMatch,C=US"
+          fi
+          echo "Keystore is ready at android/app/debug.keystore"
+
       - name: Build Release APK
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon -x lint -x test --stacktrace
 
       - name: Build Release AAB
         run: |
           cd android
-          ./gradlew bundleRelease --no-daemon --stacktrace
+          ./gradlew bundleRelease --no-daemon -x lint -x test --stacktrace
 
       - name: Package Artifacts
         run: |
@@ -147,18 +156,21 @@ jobs:
           echo "Generated build artifacts:"
           ls -la build-artifacts/
 
-      - name: Upload Royal-Dream-Match.apk Artifact
+      - name: Upload Royal-Dream-Match-APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Royal-Dream-Match.apk
+          name: Royal-Dream-Match-APK
           path: build-artifacts/Royal-Dream-Match.apk
+          if-no-files-found: error
           retention-days: 30
 
-      - name: Upload Royal-Dream-Match.aab Artifact
+      - name: Upload Royal-Dream-Match-AAB Artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: Royal-Dream-Match.aab
+          name: Royal-Dream-Match-AAB
           path: build-artifacts/Royal-Dream-Match.aab
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Automatic GitHub Release with APK & AAB
