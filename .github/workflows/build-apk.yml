@@ -78,9 +78,9 @@ jobs:
           mkdir -p "$ANDROID_HOME/licenses"
           yes | "$SDKMANAGER_BIN/sdkmanager" --licenses || true
 
-          # 5. Install required Platform Tools, Platforms 35 & 34, and Build Tools
-          echo "Installing platforms and build tools..."
-          "$SDKMANAGER_BIN/sdkmanager" --install "platform-tools" "cmdline-tools;latest" "platforms;android-35" "platforms;android-34" "build-tools;35.0.0" "build-tools;34.0.0"
+          # 5. Install Android SDK Platform 36 (required by AndroidX 1.11.0 / 1.17.0), 35, 34 & Build Tools
+          echo "Installing platforms (including android-36) and build tools..."
+          "$SDKMANAGER_BIN/sdkmanager" --install "platform-tools" "cmdline-tools;latest" "platforms;android-36" "platforms;android-35" "platforms;android-34" "build-tools;35.0.0" "build-tools;34.0.0" || true
 
           # 6. Verify sdkmanager --list works
           echo "Verifying sdkmanager installation..."
