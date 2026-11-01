@@ -35,7 +35,61 @@ jobs:
           cache: 'gradle'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          # 1. Configure and export ANDROID_HOME
+          ANDROID_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          if [ ! -d "$ANDROID_ROOT" ]; then
+            ANDROID_ROOT="$HOME/android-sdk"
+            mkdir -p "$ANDROID_ROOT"
+          fi
+          echo "ANDROID_HOME=$ANDROID_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_ROOT" >> $GITHUB_ENV
+          export ANDROID_HOME="$ANDROID_ROOT"
+          export ANDROID_SDK_ROOT="$ANDROID_ROOT"
+
+          # 2. Locate or install Command-line Tools (sdkmanager)
+          SDKMANAGER_BIN=""
+          if [ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            SDKMANAGER_BIN="$ANDROID_HOME/cmdline-tools/latest/bin"
+          else
+            # Search for any pre-installed sdkmanager in runner
+            EXISTING=$(find "$ANDROID_HOME" -name sdkmanager -type f 2>/dev/null | grep -E 'cmdline-tools/(latest|[0-9.]+)/bin/sdkmanager' | head -n 1)
+            if [ -n "$EXISTING" ]; then
+              SDKMANAGER_BIN=$(dirname "$EXISTING")
+            else
+              echo "Downloading Android Command-line tools..."
+              mkdir -p "$ANDROID_HOME/cmdline-tools"
+              curl -sS -L -o /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+              unzip -q -o /tmp/cmdline-tools.zip -d /tmp/cmdline-extracted
+              mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+              cp -r /tmp/cmdline-extracted/cmdline-tools/* "$ANDROID_HOME/cmdline-tools/latest/" || true
+              SDKMANAGER_BIN="$ANDROID_HOME/cmdline-tools/latest/bin"
+            fi
+          fi
+
+          # 3. Export PATH to GitHub Environment
+          echo "$SDKMANAGER_BIN" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
+          export PATH="$SDKMANAGER_BIN:$ANDROID_HOME/platform-tools:$PATH"
+
+          # 4. Accept Android SDK Licenses
+          echo "Accepting Android SDK licenses..."
+          mkdir -p "$ANDROID_HOME/licenses"
+          yes | "$SDKMANAGER_BIN/sdkmanager" --licenses || true
+
+          # 5. Install required Platform Tools, Platform 34, and Build Tools
+          echo "Installing platform-tools, platforms;android-34, and build-tools;34.0.0..."
+          "$SDKMANAGER_BIN/sdkmanager" --install "platform-tools" "cmdline-tools;latest" "platforms;android-34" "build-tools;34.0.0"
+
+          # 6. Verify sdkmanager --list works
+          echo "Verifying sdkmanager installation..."
+          "$SDKMANAGER_BIN/sdkmanager" --list | head -n 25
+
+          # 7. Configure local.properties for Gradle
+          mkdir -p android
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "Android SDK configured successfully at $ANDROID_HOME"
 
       - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
