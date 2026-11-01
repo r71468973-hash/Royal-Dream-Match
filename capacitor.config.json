@@ -1,0 +1,9 @@
+{
+  "appId": "com.royaldream.match",
+  "appName": "Royal Dream Match",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

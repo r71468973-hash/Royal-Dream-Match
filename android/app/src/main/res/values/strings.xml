@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Royal Dream Match</string>
+    <string name="title_activity_main">Royal Dream Match</string>
+    <string name="package_name">com.royaldream.match</string>
+    <string name="custom_url_scheme">com.royaldream.match</string>
+</resources>

@@ -1,0 +1,98 @@
+name: Build Android APK and AAB
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Publish as GitHub Release'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build APK and AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK and AAB
+        run: |
+          cd android
+          ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Rename Artifacts for Convenience
+        run: |
+          mkdir -p build-artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/RoyalDreamMatch-v1.0-debug.apk || true
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/RoyalDreamMatch-v1.0-release.apk || true
+          cp android/app/build/outputs/bundle/release/app-release.aab build-artifacts/RoyalDreamMatch-v1.0.aab || true
+
+      - name: Upload APK & AAB Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: RoyalDreamMatch-Android-Build
+          path: |
+            build-artifacts/*.apk
+            build-artifacts/*.aab
+          retention-days: 30
+
+      - name: Create Automatic GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build-artifacts/*.apk
+            build-artifacts/*.aab
+          name: Royal Dream Match Release ${{ github.ref_name }}
+          body: |
+            ### Royal Dream Match Android Release
+            - **Package Name**: `com.royaldream.match`
+            - **Version**: `1.0.0`
+            - **Built with**: Node.js 22 & Java 21
+            - **Google AdMob**: Configured (Banner, Interstitial, Rewarded)
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

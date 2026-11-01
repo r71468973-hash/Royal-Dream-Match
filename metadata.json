@@ -1,0 +1,6 @@
+{
+  "name": "Royal Dream Match",
+  "description": "Play Royal Dream Match - A premier Match-3 puzzle adventure featuring 100 royal levels, colorful gems, powerful boosters, and royal obstacles!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
