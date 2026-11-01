@@ -353,16 +353,44 @@ class SoundManager {
     }
   }
 
+  public isSoundEnabled(): boolean {
+    return this.soundEnabled;
+  }
+
+  public isMusicEnabled(): boolean {
+    return this.musicEnabled;
+  }
+
+  public toggleSound(): boolean {
+    const next = !this.soundEnabled;
+    this.setSoundEnabled(next);
+    if (next) this.playTap();
+    return next;
+  }
+
+  public toggleMusic(): boolean {
+    const next = !this.musicEnabled;
+    this.setMusicEnabled(next);
+    return next;
+  }
+
   public startMusic() {
     if (!this.musicEnabled) return;
     if (this.musicInterval) return;
 
-    const chords = [
-      [261.63, 329.63, 392.00], // C
-      [220.00, 261.63, 329.63], // Am
-      [174.61, 220.00, 261.63], // F
-      [196.00, 246.94, 293.66], // G
+    // Royal court progression: Eb - Bb - Cm - Ab - Eb - Bb - G - Cm (majestic royal court progression)
+    const courtChords = [
+      [311.13, 392.00, 466.16], // Eb maj
+      [233.08, 293.66, 349.23], // Bb maj
+      [261.63, 311.13, 392.00], // C min
+      [207.65, 261.63, 311.13], // Ab maj
+      [311.13, 392.00, 466.16], // Eb maj
+      [233.08, 293.66, 349.23], // Bb maj
+      [196.00, 246.94, 293.66], // G maj
+      [261.63, 329.63, 392.00], // C maj resolution
     ];
+
+    const arpeggioPattern = [0, 1, 2, 1, 2, 0];
 
     this.musicInterval = setInterval(() => {
       if (!this.musicEnabled) return;
@@ -370,28 +398,32 @@ class SoundManager {
       if (!this.ctx) return;
 
       try {
-        const chordIndex = Math.floor(this.musicStep / 4) % chords.length;
-        const noteIndex = this.musicStep % 3;
-        const freq = chords[chordIndex][noteIndex] * 1.5;
-
+        const chordIndex = Math.floor(this.musicStep / arpeggioPattern.length) % courtChords.length;
+        const patternIdx = this.musicStep % arpeggioPattern.length;
+        const noteIdx = arpeggioPattern[patternIdx];
+        const chord = courtChords[chordIndex];
+        const baseFreq = chord[noteIdx];
+        
+        // Soft royal music box tone
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.type = patternIdx === 0 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
 
-        gain.gain.setValueAtTime(0.025, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0005, this.ctx.currentTime + 0.4);
+        const volume = patternIdx === 0 ? 0.035 : 0.02;
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0002, this.ctx.currentTime + 0.45);
 
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.45);
+        osc.stop(this.ctx.currentTime + 0.48);
 
         this.musicStep++;
       } catch {
-        // ignore
+        // ignore audio policy
       }
-    }, 450);
+    }, 420);
   }
 
   public stopMusic() {

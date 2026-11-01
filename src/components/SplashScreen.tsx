@@ -15,7 +15,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1800; // 1.8 seconds smooth load
+    const duration = 1600;
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -26,9 +26,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         clearInterval(timer);
         setTimeout(() => {
           onFinish();
-        }, 200);
+        }, 150);
       }
-    }, 30);
+    }, 25);
 
     return () => clearInterval(timer);
   }, [onFinish]);
@@ -36,51 +36,56 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   return (
     <div
       onClick={onFinish}
-      className="relative w-full h-full flex flex-col items-center justify-between py-12 px-6 bg-gradient-to-b from-[#0b1b3d] via-[#102d68] to-[#081329] select-none cursor-pointer overflow-hidden"
+      className="relative w-full h-full flex flex-col items-center justify-between py-12 px-6 bg-[#0e031a] select-none cursor-pointer overflow-hidden"
     >
-      {/* Background Starry Glow & Vignette */}
-      <div className="absolute inset-0 bg-radial from-blue-500/20 via-transparent to-black/60 pointer-events-none" />
+      {/* Royal Palace Wallpaper with Velvet Scrim */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-40 pointer-events-none"
+        style={{ backgroundImage: "url('/royal_palace_bg.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1c0535]/85 via-[#100220]/75 to-[#090114]/95 pointer-events-none" />
 
       {/* Floating Sparkles in Background */}
       <div className="absolute top-1/4 left-10 text-yellow-300 text-lg animate-ping">✦</div>
       <div className="absolute top-1/3 right-8 text-amber-200 text-sm animate-pulse">✨</div>
-      <div className="absolute bottom-1/3 left-12 text-blue-200 text-xs animate-bounce">✦</div>
+      <div className="absolute bottom-1/3 left-12 text-yellow-200 text-xs animate-bounce">✦</div>
       <div className="absolute top-16 right-16 text-yellow-100 text-xl animate-pulse">✦</div>
 
-      {/* Castle Silhouette at bottom */}
-      <div className="absolute bottom-0 inset-x-0 h-44 opacity-25 pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none" fill="#030712">
-          <path d="M0 150 L0 100 L40 100 L40 60 L60 40 L80 60 L80 100 L120 100 L140 30 L160 30 L180 100 L220 100 L240 10 L260 10 L280 100 L320 100 L340 50 L360 50 L360 100 L400 100 L400 150 Z" />
-        </svg>
-      </div>
-
       {/* Top Banner Tag */}
-      <div className="relative z-10 flex items-center gap-2 px-4 py-1 rounded-full bg-blue-900/60 border border-yellow-300/40 backdrop-blur-sm shadow-md">
+      <div className="relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/80 border border-amber-400/50 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
         <span className="text-yellow-400 text-xs">👑</span>
-        <span className="text-yellow-200 text-xs font-semibold tracking-wider uppercase">
+        <span className="text-amber-200 text-xs font-black tracking-wider uppercase">
           Royal Match-3 Adventure
         </span>
       </div>
 
-      {/* Central Animated Royal Logo */}
+      {/* Central Animated Royal Logo & Crown */}
       <div className="relative z-10 flex flex-col items-center gap-4 my-auto">
+        <div className="relative w-28 h-28 rounded-3xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 p-1 shadow-[0_12px_36px_rgba(245,158,11,0.6)] border-2 border-white flex items-center justify-center overflow-hidden">
+          <img 
+            src="/icon.png" 
+            alt="Royal Dream Match" 
+            className="w-full h-full object-cover rounded-2xl"
+          />
+        </div>
+
         <RoyalLogo size="lg" animated={true} />
 
-        <p className="text-blue-200 text-sm font-medium tracking-wide mt-2 text-center drop-shadow">
+        <p className="text-amber-200/90 text-sm font-semibold tracking-wide text-center drop-shadow">
           Kingdom Puzzles & Royal Treasures
         </p>
       </div>
 
       {/* Bottom Loading Progress Bar */}
       <div className="relative z-10 w-full max-w-xs flex flex-col items-center gap-2">
-        <div className="w-full h-4 rounded-full bg-blue-950/80 border-2 border-yellow-400/80 p-0.5 shadow-[0_4px_12px_rgba(0,0,0,0.8)] overflow-hidden">
+        <div className="w-full h-4 rounded-full bg-purple-950/90 border-2 border-amber-400 p-0.5 shadow-[0_4px_16px_rgba(0,0,0,0.8)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-200 transition-all duration-75 shadow-[0_0_10px_rgba(250,204,21,0.8)]"
+            className="h-full rounded-full bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 transition-all duration-75 shadow-[0_0_12px_rgba(251,191,36,0.9)]"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="flex justify-between w-full px-2 text-xs font-bold text-yellow-200/90">
+        <div className="flex justify-between w-full px-2 text-xs font-black text-amber-200/90">
           <span>Loading Royal Realm...</span>
           <span>{progress}%</span>
         </div>

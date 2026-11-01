@@ -33,7 +33,7 @@ const REWARDS: RewardItem[] = [
   { day: 3, label: '200 Coins', coins: 200, icon: '💰' },
   { day: 4, label: 'Rocket & TNT', coins: 100, boosters: { rocket: 1, tnt: 1 }, icon: '🚀' },
   { day: 5, label: '350 Coins', coins: 350, icon: '💎' },
-  { day: 6, label: 'Rainbow Orb', coins: 150, boosters: { rainbow: 1 }, icon: '🌈' },
+  { day: 6, label: 'Rainbow Orb', coins: 150, boosters: { rainbow: 1 }, icon: '✨' },
   { day: 7, label: "King's Grand Chest", coins: 1000, boosters: { hammer: 2, rocket: 2, tnt: 2, rainbow: 2 }, icon: '👑' },
 ];
 
@@ -51,13 +51,13 @@ export const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
 
     sound.playVictory();
     confetti({
-      particleCount: 80,
-      spread: 70,
+      particleCount: 90,
+      spread: 75,
       origin: { y: 0.6 },
     });
 
     const reward = REWARDS[currentStreak];
-    const newStreak = (playerState.dailyReward.streak + 1);
+    const newStreak = playerState.dailyReward.streak + 1;
 
     const newState: PlayerState = {
       ...playerState,
@@ -78,8 +78,8 @@ export const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-blue-900 via-indigo-950 to-blue-950 border-4 border-yellow-400 p-5 shadow-[0_10px_35px_rgba(0,0,0,0.8)] text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 select-none">
+      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#2e0854] via-[#1c0535] to-[#100220] border-4 border-amber-400 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.9),inset_0_2px_4px_rgba(251,191,36,0.4)] text-white">
         
         {/* Close Button */}
         <button
@@ -87,91 +87,96 @@ export const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
             sound.playTap();
             onClose();
           }}
-          className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-600 border-2 border-yellow-300 flex items-center justify-center text-white font-bold shadow-lg active:scale-95 transition-transform"
+          className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-600 border-2 border-yellow-300 flex items-center justify-center text-white font-bold shadow-lg active:scale-95 transition-transform cursor-pointer"
         >
           ✕
         </button>
 
         {/* Modal Header */}
-        <div className="text-center mb-4">
-          <div className="inline-block px-4 py-1 rounded-full bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-xs font-bold tracking-widest uppercase mb-1">
+        <div className="text-center mb-3">
+          <div className="inline-block px-4 py-1 rounded-full bg-purple-900/80 border border-amber-400/60 text-amber-300 text-xs font-black tracking-widest uppercase mb-1">
             Royal Calendar
           </div>
           <h2
-            className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-amber-500 drop-shadow"
+            className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 drop-shadow"
             style={{ fontFamily: "'Fredoka', sans-serif" }}
           >
-            DAILY REWARDS
+            Daily Royal Gifts
           </h2>
-          <p className="text-xs text-blue-200">
-            Log in every day to earn royal treasures & power-ups!
+          <p className="text-xs text-purple-200/90 font-medium">
+            Claim royal coins & booster supplies every 24 hours!
           </p>
         </div>
 
         {/* 7 Days Grid */}
         <div className="grid grid-cols-4 gap-2 mb-4">
-          {REWARDS.map((item, index) => {
-            const isToday = index === currentStreak;
-            const isClaimed = !canClaim && index === currentStreak;
-            const isPast = index < currentStreak;
-            const isDay7 = item.day === 7;
+          {REWARDS.slice(0, 6).map((item, idx) => {
+            const isCompleted = idx < currentStreak;
+            const isToday = idx === currentStreak && canClaim;
+            const isFuture = idx > currentStreak || (idx === currentStreak && !canClaim);
 
             return (
               <div
                 key={item.day}
-                className={`relative rounded-xl p-2 flex flex-col items-center justify-between text-center border-2 transition-transform ${
-                  isDay7 ? 'col-span-2' : ''
-                } ${
-                  isToday && canClaim
-                    ? 'bg-gradient-to-b from-yellow-500/30 to-amber-600/30 border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-                    : isPast || isClaimed
-                    ? 'bg-blue-950/60 border-emerald-500/60 opacity-80'
-                    : 'bg-blue-950/40 border-blue-800/80 opacity-70'
+                className={`relative flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition-transform ${
+                  isToday
+                    ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-700 border-yellow-200 shadow-[0_0_16px_rgba(250,204,21,0.7)] scale-105 z-10 animate-pulse'
+                    : isCompleted
+                    ? 'bg-purple-950/70 border-emerald-500/80 text-emerald-300'
+                    : 'bg-purple-950/40 border-purple-800 text-purple-400 opacity-60'
                 }`}
               >
-                {/* Day Tag */}
-                <span className="text-[10px] font-bold text-yellow-200 uppercase">
+                <span className="text-[10px] font-black uppercase text-amber-200">
                   Day {item.day}
                 </span>
-
-                {/* Reward Icon */}
-                <div className="text-2xl my-1 drop-shadow">{item.icon}</div>
-
-                {/* Reward Label */}
-                <span className="text-[10px] font-extrabold text-white leading-tight">
+                <span className="text-2xl my-1">{item.icon}</span>
+                <span className="text-[9px] font-bold text-center leading-tight">
                   {item.label}
                 </span>
 
-                {/* Status Badges */}
-                {isPast || isClaimed ? (
-                  <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[10px] flex items-center justify-center font-bold">
-                    ✓
+                {isCompleted && (
+                  <div className="absolute inset-0 bg-emerald-950/70 rounded-2xl flex items-center justify-center">
+                    <span className="text-lg font-black text-emerald-300">✓</span>
                   </div>
-                ) : isToday && canClaim ? (
-                  <div className="absolute -top-1 -right-1 px-1 rounded-full bg-red-600 text-[8px] font-black text-white animate-pulse">
-                    READY
-                  </div>
-                ) : null}
+                )}
               </div>
             );
           })}
+
+          {/* Day 7 Grand Chest (Spans 2 cols) */}
+          <div
+            className={`col-span-2 relative flex items-center justify-between px-3 py-2 rounded-2xl border-2 ${
+              currentStreak === 6 && canClaim
+                ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 border-white shadow-[0_0_20px_rgba(250,204,21,0.9)] scale-105 animate-bounce'
+                : currentStreak > 6
+                ? 'bg-purple-950/70 border-emerald-500/80 text-emerald-300'
+                : 'bg-purple-950/40 border-purple-800 text-purple-400 opacity-60'
+            }`}
+          >
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] font-black uppercase text-purple-950">
+                DAY 7 · GRAND CHEST
+              </span>
+              <span className="text-xs font-black text-purple-950">
+                1000 Coins + All Boosters
+              </span>
+            </div>
+            <span className="text-3xl">👑</span>
+          </div>
         </div>
 
-        {/* Action Button */}
-        <div className="mt-2 flex flex-col items-center gap-2">
-          {canClaim ? (
-            <button
-              onClick={handleClaim}
-              className="w-full py-3 rounded-2xl bg-gradient-to-b from-yellow-300 via-amber-400 to-amber-600 border-2 border-yellow-100 text-blue-950 font-black text-base tracking-wider uppercase shadow-[0_6px_20px_rgba(245,158,11,0.6)] active:scale-95 transition-transform"
-            >
-              CLAIM REWARD NOW!
-            </button>
-          ) : (
-            <div className="w-full py-2.5 rounded-2xl bg-blue-950/80 border border-blue-700 text-center text-xs font-bold text-blue-300">
-              ✓ Reward Claimed! Next reward in tomorrow.
-            </div>
-          )}
-        </div>
+        {/* Claim Button */}
+        <button
+          onClick={handleClaim}
+          disabled={!canClaim}
+          className={`w-full py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider transition-all ${
+            canClaim
+              ? 'bg-gradient-to-b from-amber-300 via-yellow-500 to-amber-600 text-purple-950 border-2 border-yellow-200 shadow-[0_5px_0_#92400e,0_8px_16px_rgba(0,0,0,0.4)] active:translate-y-1 active:shadow-[0_1px_0_#92400e] cursor-pointer'
+              : 'bg-purple-950/40 border-2 border-purple-800 text-purple-400 opacity-60 cursor-not-allowed'
+          }`}
+        >
+          {canClaim ? 'CLAIM ROYAL REWARD! 🎁' : 'ALREADY CLAIMED TODAY ✓'}
+        </button>
       </div>
     </div>
   );

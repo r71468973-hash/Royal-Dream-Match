@@ -12,6 +12,7 @@ interface AdMobBannerProps {
 
 export const AdMobBanner: React.FC<AdMobBannerProps> = ({ className = '' }) => {
   const [closed, setClosed] = useState(false);
+  const [feedback, setFeedback] = useState(false);
   const config = admobService.getConfig();
 
   if (closed) return null;
@@ -46,11 +47,12 @@ export const AdMobBanner: React.FC<AdMobBannerProps> = ({ className = '' }) => {
       <div className="flex items-center gap-1.5 ml-1">
         <button
           onClick={() => {
-            alert('Google AdMob: This is an interactive test banner ad. In production, this renders via Google Mobile Ads SDK.');
+            setFeedback(true);
+            setTimeout(() => setFeedback(false), 2500);
           }}
-          className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-[10px] font-bold text-white shadow transition-colors"
+          className="px-2 py-1 rounded bg-amber-500 hover:bg-amber-400 text-[10px] font-bold text-amber-950 shadow transition-colors"
         >
-          INSTALL
+          {feedback ? 'OPENING...' : 'INSTALL'}
         </button>
 
         <button

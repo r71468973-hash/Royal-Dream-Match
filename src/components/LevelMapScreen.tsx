@@ -8,6 +8,7 @@ import { PlayerState, LevelConfig } from '../types/game';
 import { getLevelConfig } from '../game/levels';
 import { sound } from '../game/sound';
 import { PieceView } from './PieceView';
+import { RoyalAlertModal } from './RoyalAlertModal';
 
 interface LevelMapScreenProps {
   playerState: PlayerState;
@@ -21,6 +22,7 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
   onBackHome,
 }) => {
   const [selectedLevelPreview, setSelectedLevelPreview] = useState<LevelConfig | null>(null);
+  const [alertState, setAlertState] = useState<{ title: string; message: string; icon?: string } | null>(null);
   const currentLevelRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +36,22 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
   const totalLevels = 100;
   const levelNumbers = Array.from({ length: totalLevels }, (_, i) => i + 1);
 
+  const getMilestoneName = (lvl: number): string | null => {
+    switch (lvl) {
+      case 10: return '🏰 The Royal Courtyard';
+      case 20: return '🛡️ Knights Armory';
+      case 30: return '🌳 Castle Emerald Gardens';
+      case 40: return '👑 The Gilded Ballroom';
+      case 50: return '💎 The Royal Jewel Vault';
+      case 60: return '⚔️ Grand Citadel Watch';
+      case 70: return '🦅 High Falcon Keep';
+      case 80: return '✨ Mystic Alchemist Tower';
+      case 90: return '🌟 King Leo’s Sanctuary';
+      case 100: return '👑 The Imperial Throne Room';
+      default: return null;
+    }
+  };
+
   const handleLevelClick = (lvlNum: number) => {
     sound.playTap();
     if (lvlNum <= playerState.highestUnlockedLevel) {
@@ -41,13 +59,22 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
       setSelectedLevelPreview(config);
     } else {
       sound.playInvalid();
+      setAlertState({
+        title: 'LEVEL LOCKED',
+        message: `Complete Level ${lvlNum - 1} to unlock this royal challenge!`,
+        icon: '🔒',
+      });
     }
   };
 
   const startLevel = (lvlNum: number) => {
     if (playerState.lives <= 0) {
       sound.playInvalid();
-      alert('Out of lives! Wait for lives to recharge or claim daily rewards.');
+      setAlertState({
+        title: 'OUT OF HEARTS',
+        message: 'You need at least 1 heart to play. Wait for hearts to recharge or claim daily rewards!',
+        icon: '💔',
+      });
       return;
     }
     sound.playVictory();
@@ -55,23 +82,30 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-gradient-to-b from-[#0e1d42] via-[#142858] to-[#081329] select-none overflow-hidden">
+    <div className="relative w-full h-full flex flex-col bg-[#0e031a] select-none overflow-hidden">
       
+      {/* Royal Palace Wallpaper with Velvet Dark Scrim */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none"
+        style={{ backgroundImage: "url('/royal_palace_bg.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1c0535]/90 via-[#100220]/80 to-[#090114]/95 pointer-events-none" />
+
       {/* Top Navigation Bar */}
-      <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-blue-950/80 border-b-2 border-yellow-400/40 backdrop-blur-md shadow-md">
+      <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-purple-950/85 border-b-2 border-amber-400/50 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
         <button
           onClick={() => {
             sound.playTap();
             onBackHome();
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-900 border border-yellow-300 text-yellow-200 text-xs font-black shadow active:scale-95 transition-transform"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-b from-purple-800 to-purple-950 border border-amber-400 text-amber-200 text-xs font-black shadow-[0_3px_0_#2e1065] active:translate-y-0.5 active:shadow-none transition-all"
         >
           <span>🏰</span>
           <span>Home</span>
         </button>
 
         <div className="text-center">
-          <div className="text-[10px] font-bold text-yellow-300 uppercase tracking-widest">
+          <div className="text-[10px] font-bold text-amber-300 uppercase tracking-widest">
             Royal Kingdom
           </div>
           <div className="text-sm font-black text-white">
@@ -82,14 +116,14 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
         {/* Currency badges */}
         <div className="flex items-center gap-2">
           {/* Lives */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-950/80 border border-red-500/80 text-xs font-black text-rose-200 shadow">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-950/90 border border-rose-500/80 text-xs font-black text-rose-200 shadow">
             <span>❤️</span>
             <span>{playerState.lives}</span>
           </div>
           {/* Coins */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-950/80 border border-yellow-500/80 text-xs font-black text-yellow-200 shadow">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-950/90 border border-amber-400 text-xs font-black text-amber-200 shadow">
             <span>🪙</span>
-            <span>{playerState.coins}</span>
+            <span>{playerState.coins.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -97,138 +131,130 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
       {/* Scrollable Map Path */}
       <div
         ref={scrollContainerRef}
-        className="relative flex-1 overflow-y-auto px-4 py-8 flex flex-col items-center"
+        className="relative z-10 flex-1 overflow-y-auto px-4 py-8 flex flex-col items-center"
       >
-        {/* Kingdom background decorative motifs */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none">
-          <div className="absolute top-10 left-6 text-6xl">🏰</div>
-          <div className="absolute top-80 right-8 text-6xl">🌲</div>
-          <div className="absolute top-[600px] left-10 text-6xl">⛲</div>
-          <div className="absolute top-[1200px] right-6 text-6xl">⚔️</div>
-          <div className="absolute top-[1800px] left-8 text-6xl">👑</div>
-        </div>
-
-        <div className="relative w-full max-w-sm flex flex-col items-center gap-5">
-          {levelNumbers.map((lvl) => {
-            const isUnlocked = lvl <= playerState.highestUnlockedLevel;
-            const isCurrent = lvl === playerState.currentLevel;
-            const progress = playerState.completedLevels[lvl];
+        <div className="relative w-full max-w-sm flex flex-col items-center gap-5 pb-16">
+          
+          {levelNumbers.map((lvlNum) => {
+            const isUnlocked = lvlNum <= playerState.highestUnlockedLevel;
+            const isCurrent = lvlNum === playerState.currentLevel;
+            const progress = playerState.completedLevels[lvlNum];
             const stars = progress?.stars || 0;
+            const milestone = getMilestoneName(lvlNum);
 
-            // Calculate sinusoidal winding offset for S-curve path
-            const offsetX = Math.sin(lvl * 0.75) * 80;
+            // Sine wave horizontal offset for winding castle path
+            const offsetX = Math.sin(lvlNum * 0.75) * 65;
 
             return (
-              <div
-                key={lvl}
-                ref={isCurrent ? currentLevelRef : null}
-                style={{ transform: `translateX(${offsetX}px)` }}
-                className="relative flex flex-col items-center transition-transform"
-              >
-                {/* Level Circle Node */}
-                <button
-                  onClick={() => handleLevelClick(lvl)}
-                  className={`relative w-16 h-16 rounded-full flex flex-col items-center justify-center border-4 shadow-xl active:scale-95 transition-all ${
-                    isCurrent
-                      ? 'bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 border-white ring-4 ring-yellow-400/80 scale-110 animate-bounce'
-                      : isUnlocked
-                      ? 'bg-gradient-to-b from-blue-500 via-indigo-600 to-blue-900 border-yellow-400'
-                      : 'bg-gradient-to-b from-slate-700 to-slate-900 border-slate-600 opacity-60'
-                  }`}
-                >
-                  {/* Current crown badge */}
-                  {isCurrent && (
-                    <div className="absolute -top-4 text-base drop-shadow animate-bounce">
-                      👑
+              <React.Fragment key={lvlNum}>
+                {/* Milestone Banner */}
+                {milestone && (
+                  <div className="w-full my-2 flex items-center justify-center">
+                    <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-950 via-amber-950 to-purple-950 border border-amber-400/80 text-amber-200 text-xs font-black shadow-lg flex items-center gap-2">
+                      <span>{milestone}</span>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {isUnlocked ? (
-                    <>
-                      <span className="text-sm font-black text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-                        {lvl}
-                      </span>
-                      {/* Star rating dots */}
-                      <div className="flex gap-0.5 mt-0.5">
+                {/* Level Stepping Stone Button */}
+                <div
+                  ref={isCurrent ? currentLevelRef : undefined}
+                  style={{ transform: `translateX(${offsetX}px)` }}
+                  className="relative transition-transform"
+                >
+                  <button
+                    onClick={() => handleLevelClick(lvlNum)}
+                    className={`relative w-15 h-15 rounded-3xl flex flex-col items-center justify-center border-3 transition-all cursor-pointer ${
+                      isCurrent
+                        ? 'bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-600 border-white shadow-[0_0_24px_rgba(250,204,21,0.9),0_6px_0_#92400e] scale-115 z-10 animate-bounce'
+                        : isUnlocked
+                        ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-700 border-yellow-200 shadow-[0_4px_0_#78350f,0_6px_12px_rgba(0,0,0,0.5)] hover:scale-105 active:translate-y-1 active:shadow-none'
+                        : 'bg-purple-950/70 border-purple-800 text-purple-400 opacity-60 shadow-inner'
+                    }`}
+                  >
+                    {isCurrent && (
+                      <span className="absolute -top-3.5 text-base drop-shadow">👑</span>
+                    )}
+
+                    <span
+                      className={`text-base font-black ${
+                        isCurrent
+                          ? 'text-purple-950'
+                          : isUnlocked
+                          ? 'text-purple-950 drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]'
+                          : 'text-purple-400'
+                      }`}
+                      style={{ fontFamily: "'Fredoka', sans-serif" }}
+                    >
+                      {lvlNum}
+                    </span>
+
+                    {/* Stars Earned */}
+                    {isUnlocked && stars > 0 && (
+                      <div className="flex gap-0.5 text-[10px] text-yellow-300 drop-shadow">
                         {[1, 2, 3].map((s) => (
-                          <span
-                            key={s}
-                            className={`text-[10px] ${
-                              s <= stars ? 'text-yellow-300 drop-shadow' : 'text-slate-400 opacity-40'
-                            }`}
-                          >
+                          <span key={s} className={s <= stars ? 'opacity-100' : 'opacity-25'}>
                             ★
                           </span>
                         ))}
                       </div>
-                    </>
-                  ) : (
-                    <span className="text-lg text-slate-400">🔒</span>
-                  )}
-                </button>
+                    )}
 
-                {/* Milestone flag marker every 10 levels */}
-                {lvl % 10 === 0 && (
-                  <div className="absolute -right-14 top-2 px-2 py-0.5 rounded-full bg-yellow-400 border border-yellow-100 text-blue-950 text-[10px] font-black shadow">
-                    Royal Gate {lvl / 10}
-                  </div>
-                )}
-              </div>
+                    {!isUnlocked && (
+                      <span className="text-xs text-purple-500">🔒</span>
+                    )}
+                  </button>
+                </div>
+              </React.Fragment>
             );
           })}
         </div>
       </div>
 
-      {/* Floating Jump to Current Button */}
-      <button
-        onClick={() => {
-          sound.playTap();
-          if (currentLevelRef.current) {
-            currentLevelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }}
-        className="absolute bottom-4 right-4 z-20 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 border-2 border-white text-blue-950 font-black text-xs shadow-lg active:scale-95 transition-transform flex items-center gap-1.5"
-      >
-        <span>🎯</span>
-        <span>My Level</span>
-      </button>
-
-      {/* Level Target Preview Modal */}
+      {/* Level Preview Modal */}
       {selectedLevelPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-xs rounded-3xl bg-gradient-to-b from-blue-900 via-indigo-950 to-blue-950 border-4 border-yellow-400 p-5 shadow-2xl text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in select-none">
+          <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#2e0854] via-[#1c0535] to-[#100220] border-4 border-amber-400 p-6 shadow-[0_16px_40px_rgba(0,0,0,0.9),inset_0_2px_4px_rgba(251,191,36,0.4)] text-white text-center flex flex-col items-center">
             
+            {/* Close Button */}
             <button
               onClick={() => {
                 sound.playTap();
                 setSelectedLevelPreview(null);
               }}
-              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-600 border-2 border-yellow-300 flex items-center justify-center text-white font-bold shadow-lg"
+              className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-600 border-2 border-yellow-300 flex items-center justify-center text-white font-bold shadow-lg active:scale-95 transition-transform"
             >
               ✕
             </button>
 
-            <div className="text-center mb-4">
-              <span className="px-3 py-1 rounded-full bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-xs font-bold uppercase">
-                Level {selectedLevelPreview.levelNumber}
-              </span>
-              <h3 className="text-xl font-black text-white mt-1">
-                Royal Challenge
-              </h3>
-              <p className="text-xs text-blue-200 mt-1">
-                {selectedLevelPreview.description}
-              </p>
+            {/* Crown Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-700 border-2 border-yellow-200 flex items-center justify-center text-3xl shadow-[0_6px_20px_rgba(245,158,11,0.5)] mb-2">
+              👑
             </div>
 
-            {/* Target Boxes */}
-            <div className="bg-blue-950/80 rounded-2xl p-3 border border-blue-800 flex flex-col gap-2 mb-4">
-              <div className="text-xs font-bold text-yellow-300 uppercase tracking-wider text-center">
-                Targets to Clear
+            <div className="text-[10px] font-black text-amber-300 uppercase tracking-widest">
+              Royal Mission
+            </div>
+            <h3
+              className="text-2xl font-black text-white mb-2"
+              style={{ fontFamily: "'Fredoka', sans-serif" }}
+            >
+              LEVEL {selectedLevelPreview.levelNumber}
+            </h3>
+
+            <p className="text-xs text-purple-200/90 mb-4 px-2">
+              {selectedLevelPreview.description}
+            </p>
+
+            {/* Target Goals */}
+            <div className="w-full bg-purple-950/70 rounded-2xl p-3 border border-amber-400/30 mb-4">
+              <div className="text-[10px] font-bold text-amber-300 uppercase tracking-wider mb-2">
+                Level Targets · {selectedLevelPreview.moves} Moves
               </div>
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center items-center gap-4">
                 {selectedLevelPreview.targets.map((tgt, i) => (
                   <div key={i} className="flex flex-col items-center gap-1">
-                    <div className="w-10 h-10 rounded-xl bg-blue-900/60 border border-yellow-300/40 p-1 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-purple-900/80 border border-amber-300/40 p-1 flex items-center justify-center shadow">
                       {tgt.type === 'wood' && (
                         <div className="w-6 h-6 rounded bg-amber-800 border border-amber-500" />
                       )}
@@ -245,32 +271,36 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
                       )}
                     </div>
                     <span className="text-xs font-black text-white">
-                      {tgt.count}
+                      ×{tgt.count}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Moves info */}
-            <div className="flex justify-between items-center px-4 py-2 rounded-xl bg-blue-950/60 border border-blue-800 mb-4 text-xs font-bold">
-              <span className="text-blue-200">Moves Allowed:</span>
-              <span className="text-yellow-300 text-sm">{selectedLevelPreview.moves} Moves</span>
-            </div>
-
             {/* Play Button */}
             <button
               onClick={() => {
-                const num = selectedLevelPreview.levelNumber;
+                const lvl = selectedLevelPreview.levelNumber;
                 setSelectedLevelPreview(null);
-                startLevel(num);
+                startLevel(lvl);
               }}
-              className="w-full py-3 rounded-2xl bg-gradient-to-b from-yellow-300 via-amber-400 to-amber-600 border-2 border-yellow-100 text-blue-950 font-black text-base uppercase tracking-wider shadow-[0_6px_20px_rgba(245,158,11,0.6)] active:scale-95 transition-transform"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-b from-amber-300 via-yellow-500 to-amber-600 text-purple-950 font-black text-sm uppercase tracking-wider border-2 border-yellow-200 shadow-[0_5px_0_#92400e,0_8px_16px_rgba(0,0,0,0.4)] active:translate-y-1 active:shadow-[0_1px_0_#92400e] transition-all cursor-pointer"
             >
-              PLAY LEVEL {selectedLevelPreview.levelNumber}
+              ENTER LEVEL {selectedLevelPreview.levelNumber}
             </button>
           </div>
         </div>
+      )}
+
+      {/* Royal Alert Modal */}
+      {alertState && (
+        <RoyalAlertModal
+          title={alertState.title}
+          message={alertState.message}
+          icon={alertState.icon}
+          onConfirm={() => setAlertState(null)}
+        />
       )}
     </div>
   );

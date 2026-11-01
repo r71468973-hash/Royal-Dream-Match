@@ -11,6 +11,7 @@ import { sound } from '../game/sound';
 import { admobService } from '../services/admobService';
 import { AdMobBanner } from './AdMobBanner';
 import { ApkDownloadModal } from './ApkDownloadModal';
+import { RoyalAlertModal } from './RoyalAlertModal';
 
 interface HomeScreenProps {
   playerState: PlayerState;
@@ -31,6 +32,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const [lifeCountdown, setLifeCountdown] = useState<string>('');
   const [showApkModal, setShowApkModal] = useState<boolean>(false);
+  const [alertState, setAlertState] = useState<{ title: string; message: string; icon?: string } | null>(null);
 
   // Calculate life regeneration countdown if lives < 5
   useEffect(() => {
@@ -67,7 +69,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const handlePlay = () => {
     if (playerState.lives <= 0) {
       sound.playInvalid();
-      alert('You are out of lives! Watch a short ad for a free heart or wait for lives to recharge.');
+      setAlertState({
+        title: 'OUT OF LIVES!',
+        message: 'Your royal hearts are exhausted. Claim your Daily Reward or watch a short video to instantly restore a life!',
+        icon: '💔',
+      });
       return;
     }
     sound.playTap();
@@ -88,42 +94,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between p-3 pb-0 bg-gradient-to-b from-[#0b1c44] via-[#122e6b] to-[#08152e] select-none overflow-hidden">
+    <div className="relative w-full h-full flex flex-col justify-between p-3 pb-0 select-none overflow-hidden bg-[#0e031a]">
       
-      {/* Background Animated Elements */}
-      <div className="absolute inset-0 bg-radial from-blue-400/15 via-transparent to-black/60 pointer-events-none" />
+      {/* Royal Palace Background Image & Velvet Scrim */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-35 pointer-events-none"
+        style={{ backgroundImage: "url('/royal_palace_bg.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1c0535]/85 via-[#100220]/75 to-[#090114]/95 pointer-events-none" />
 
-      {/* Floating Sparkles */}
-      <div className="absolute top-1/4 left-6 text-yellow-300 text-sm animate-ping">✦</div>
-      <div className="absolute top-1/2 right-6 text-amber-200 text-lg animate-pulse">✨</div>
-      <div className="absolute bottom-1/4 left-10 text-yellow-100 text-xs animate-bounce">✦</div>
-
-      {/* Castle Wall Silhouette at bottom */}
-      <div className="absolute bottom-10 inset-x-0 h-44 opacity-20 pointer-events-none">
-        <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none" fill="#020617">
-          <path d="M0 150 L0 90 L30 90 L30 50 L50 30 L70 50 L70 90 L110 90 L130 20 L150 20 L170 90 L210 90 L230 10 L250 10 L270 90 L310 90 L330 40 L350 40 L350 90 L400 90 L400 150 Z" />
-        </svg>
-      </div>
+      {/* Floating Gold Sparkles */}
+      <div className="absolute top-1/4 left-6 text-yellow-300 text-sm animate-ping pointer-events-none">✦</div>
+      <div className="absolute top-1/2 right-6 text-amber-200 text-lg animate-pulse pointer-events-none">✨</div>
+      <div className="absolute bottom-1/4 left-10 text-yellow-100 text-xs animate-bounce pointer-events-none">✦</div>
 
       {/* Top Header / Currencies */}
       <div className="relative z-10 flex items-center justify-between gap-2">
         {/* Profile Card */}
-        <div className="flex items-center gap-2 p-1 pr-3 rounded-full bg-blue-950/80 border border-yellow-400/50 backdrop-blur-md shadow-lg">
+        <div className="flex items-center gap-2 p-1 pr-3.5 rounded-full bg-purple-950/85 border border-amber-400/60 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
           <KingAvatar mood="happy" size="sm" />
           <div className="flex flex-col">
             <span className="text-[11px] font-black text-white leading-tight">
               Royal Monarch
             </span>
-            <span className="text-[10px] font-bold text-yellow-300">
-              Level {playerState.currentLevel}
+            <span className="text-[10px] font-bold text-amber-300">
+              Level {playerState.currentLevel} of 100
             </span>
           </div>
         </div>
 
         {/* Currency Pods */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {/* Lives */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-950/80 border border-red-500/80 shadow-md">
+          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-rose-950/85 border border-rose-500/80 shadow-[0_4px_12px_rgba(244,63,94,0.3)]">
             <span className="text-xs">❤️</span>
             <div className="flex flex-col items-center">
               <span className="text-xs font-black text-white leading-none">
@@ -138,10 +141,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {/* Coins */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-950/80 border border-yellow-500/80 shadow-md">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/85 border border-amber-400/80 shadow-[0_4px_12px_rgba(245,158,11,0.3)]">
             <span className="text-xs">🪙</span>
-            <span className="text-xs font-black text-yellow-300">
-              {playerState.coins}
+            <span className="text-xs font-black text-amber-300">
+              {playerState.coins.toLocaleString()}
             </span>
           </div>
         </div>
@@ -152,12 +155,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <RoyalLogo size="md" animated={true} />
 
         {/* Hero Castle Emblem */}
-        <div className="relative my-1">
-          <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-yellow-500/30 via-blue-500/20 to-purple-500/30 border-2 border-yellow-400/60 p-2 shadow-2xl flex items-center justify-center backdrop-blur-sm">
+        <div className="relative my-2">
+          <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-purple-900/60 via-amber-500/20 to-purple-800/60 border-2 border-amber-400/70 p-2 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-center backdrop-blur-sm">
             <KingAvatar mood="happy" size="lg" />
           </div>
           {/* Level Crown Badge */}
-          <div className="absolute -bottom-2 inset-x-0 mx-auto w-max px-3 py-0.5 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 border border-white text-blue-950 text-xs font-black shadow-lg">
+          <div className="absolute -bottom-2.5 inset-x-0 mx-auto w-max px-4 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 border border-yellow-100 text-purple-950 text-xs font-black shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
             Level {playerState.currentLevel}
           </div>
         </div>
@@ -167,10 +170,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div className="relative z-10 flex flex-col items-center gap-2.5 w-full max-w-sm mx-auto mb-1">
         
         {/* Rewarded Ad & APK Download Row */}
-        <div className="flex items-center justify-between gap-2 w-full">
+        <div className="flex items-center justify-between gap-2.5 w-full">
           <button
             onClick={handleWatchAdForCoins}
-            className="flex-1 py-1.5 px-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 border border-emerald-300 text-white font-black text-[11px] shadow active:scale-95 transition-transform flex items-center justify-center gap-1"
+            className="flex-1 py-2 px-2 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-700 border border-emerald-300 text-white font-black text-[11px] shadow-[0_3px_0_#064e3b] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
           >
             <span>🎬</span>
             <span>Free Coins (+100)</span>
@@ -181,9 +184,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTap();
               setShowApkModal(true);
             }}
-            className="flex-1 py-1.5 px-2 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-800 border border-yellow-300 text-yellow-200 font-black text-[11px] shadow active:scale-95 transition-transform flex items-center justify-center gap-1"
+            className="flex-1 py-2 px-2 rounded-2xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-amber-400 text-amber-200 font-black text-[11px] shadow-[0_3px_0_#2e1065] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
           >
-            <span>📥</span>
+            <span>👑</span>
             <span>Download APK</span>
           </button>
         </div>
@@ -191,24 +194,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Giant Play Button */}
         <button
           onClick={handlePlay}
-          className="group relative w-full py-3.5 rounded-3xl bg-gradient-to-b from-yellow-300 via-amber-400 to-amber-600 border-4 border-yellow-100 shadow-[0_10px_25px_rgba(245,158,11,0.7),inset_0_2px_4px_rgba(255,255,255,0.8)] active:scale-95 transition-transform flex items-center justify-center gap-3 overflow-hidden"
+          className="group relative w-full py-4 rounded-3xl bg-gradient-to-b from-amber-300 via-yellow-500 to-amber-600 border-4 border-yellow-200 shadow-[0_6px_0_#92400e,0_12px_28px_rgba(0,0,0,0.7)] active:translate-y-1.5 active:shadow-[0_1px_0_#92400e] transition-all flex items-center justify-center gap-3 overflow-hidden cursor-pointer"
         >
           {/* Shimmer sweep */}
-          <div className="absolute inset-0 w-1/3 bg-white/30 transform -skew-x-12 translate-x-[-150%] group-hover:translate-x-[400%] transition-transform duration-1000" />
+          <div className="absolute inset-0 w-1/3 bg-white/35 transform -skew-x-12 translate-x-[-150%] group-hover:translate-x-[400%] transition-transform duration-1000" />
           
-          <span className="text-2xl drop-shadow">👑</span>
+          <span className="text-3xl drop-shadow">👑</span>
           <div className="flex flex-col text-left">
             <span
-              className="text-2xl font-black text-blue-950 tracking-wider uppercase drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"
+              className="text-2xl font-black text-purple-950 tracking-wider uppercase drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]"
               style={{ fontFamily: "'Fredoka', sans-serif" }}
             >
               PLAY LEVEL {playerState.currentLevel}
             </span>
-            <span className="text-[10px] font-bold text-amber-950 uppercase tracking-widest">
-              Tap to Start Puzzle
+            <span className="text-[10px] font-extrabold text-amber-950 uppercase tracking-widest">
+              Tap to Enter Realm
             </span>
           </div>
-          <span className="text-2xl drop-shadow">▶</span>
+          <span className="text-2xl text-purple-950 drop-shadow">▶</span>
         </button>
 
         {/* Bottom Utility Row */}
@@ -219,10 +222,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTap();
               onOpenMap();
             }}
-            className="flex flex-col items-center justify-center py-2 rounded-2xl bg-blue-950/80 border-2 border-yellow-400/60 shadow-lg active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center p-2 rounded-2xl bg-purple-950/85 hover:bg-purple-900 border border-amber-400/50 shadow-[0_3px_0_#1e0836] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <span className="text-lg">🗺️</span>
-            <span className="text-[10px] font-bold text-yellow-200 mt-0.5">Map</span>
+            <span className="text-xl">🗺️</span>
+            <span className="text-[10px] font-black text-amber-200 mt-0.5">Map</span>
           </button>
 
           {/* Daily Rewards Button */}
@@ -231,22 +234,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTap();
               onOpenDailyRewards();
             }}
-            className="relative flex flex-col items-center justify-center py-2 rounded-2xl bg-blue-950/80 border-2 border-yellow-400/60 shadow-lg active:scale-95 transition-transform"
+            className="relative flex flex-col items-center justify-center p-2 rounded-2xl bg-purple-950/85 hover:bg-purple-900 border border-amber-400/50 shadow-[0_3px_0_#1e0836] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <span className="text-lg">🎁</span>
-            <span className="text-[10px] font-bold text-yellow-200 mt-0.5">Daily</span>
             {hasDailyReward && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 border border-white animate-ping" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 animate-ping" />
             )}
+            <span className="text-xl">🎁</span>
+            <span className="text-[10px] font-black text-amber-200 mt-0.5">Daily</span>
           </button>
 
           {/* Sound Toggle Button */}
           <button
             onClick={toggleSound}
-            className="flex flex-col items-center justify-center py-2 rounded-2xl bg-blue-950/80 border-2 border-yellow-400/60 shadow-lg active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center p-2 rounded-2xl bg-purple-950/85 hover:bg-purple-900 border border-amber-400/50 shadow-[0_3px_0_#1e0836] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <span className="text-lg">{playerState.settings.sound ? '🔊' : '🔇'}</span>
-            <span className="text-[10px] font-bold text-yellow-200 mt-0.5">Sound</span>
+            <span className="text-xl">{playerState.settings.sound ? '🔊' : '🔇'}</span>
+            <span className="text-[10px] font-black text-amber-200 mt-0.5">
+              {playerState.settings.sound ? 'Sound' : 'Mute'}
+            </span>
           </button>
 
           {/* Settings Button */}
@@ -255,20 +260,32 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTap();
               onOpenSettings();
             }}
-            className="flex flex-col items-center justify-center py-2 rounded-2xl bg-blue-950/80 border-2 border-yellow-400/60 shadow-lg active:scale-95 transition-transform"
+            className="flex flex-col items-center justify-center p-2 rounded-2xl bg-purple-950/85 hover:bg-purple-900 border border-amber-400/50 shadow-[0_3px_0_#1e0836] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <span className="text-lg">⚙️</span>
-            <span className="text-[10px] font-bold text-yellow-200 mt-0.5">Settings</span>
+            <span className="text-xl">⚙️</span>
+            <span className="text-[10px] font-black text-amber-200 mt-0.5">Settings</span>
           </button>
         </div>
       </div>
 
-      {/* AdMob Banner at bottom */}
-      <AdMobBanner />
+      {/* AdMob Banner at Bottom */}
+      <div className="relative z-10 w-full mt-1">
+        <AdMobBanner />
+      </div>
 
-      {/* APK Download Modal */}
+      {/* APK Modal */}
       {showApkModal && (
         <ApkDownloadModal onClose={() => setShowApkModal(false)} />
+      )}
+
+      {/* Royal In-Game Alert Modal */}
+      {alertState && (
+        <RoyalAlertModal
+          title={alertState.title}
+          message={alertState.message}
+          icon={alertState.icon}
+          onConfirm={() => setAlertState(null)}
+        />
       )}
     </div>
   );

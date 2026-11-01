@@ -67,7 +67,6 @@ export const AdMobInterstitialModal: React.FC<AdMobInterstitialModalProps> = ({
 
           <button
             onClick={() => {
-              alert('Google AdMob: Interactive Interstitial Test Ad completed.');
               onClose();
             }}
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 border-2 border-emerald-300 text-white font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition-transform"

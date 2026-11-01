@@ -29,6 +29,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [activeTab, setActiveTab] = useState<'settings' | 'admob' | 'rules' | 'privacy'>('settings');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showApkModal, setShowApkModal] = useState(false);
+  const [rewardToast, setRewardToast] = useState<string | null>(null);
 
   // AdMob Config Local State
   const [admobConfig, setAdmobConfig] = useState<AdMobConfig>(() => admobService.getConfig());
@@ -79,8 +80,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-blue-900 via-indigo-950 to-blue-950 border-4 border-yellow-400 p-5 shadow-[0_10px_35px_rgba(0,0,0,0.8)] text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 select-none">
+      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#330f57] via-[#21093b] to-[#140424] border-4 border-amber-400 p-5 shadow-[0_12px_45px_rgba(0,0,0,0.9)] text-white">
         
         {/* Close Button */}
         <button
@@ -88,35 +89,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             sound.playTap();
             onClose();
           }}
-          className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-600 border-2 border-yellow-300 flex items-center justify-center text-white font-bold shadow-lg active:scale-95 transition-transform"
+          className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-gradient-to-b from-rose-500 to-rose-700 border-2 border-amber-300 flex items-center justify-center text-white font-black shadow-lg active:scale-95 transition-transform"
         >
           ✕
         </button>
 
+        {/* Modal Title */}
+        <div className="text-center mb-3">
+          <div className="text-amber-400 text-xs font-black tracking-widest uppercase flex items-center justify-center gap-1">
+            <span>👑</span>
+            <span>ROYAL COURT SETTINGS</span>
+            <span>👑</span>
+          </div>
+        </div>
+
+        {/* Toast notification for in-modal actions */}
+        {rewardToast && (
+          <div className="mb-3 py-1.5 px-3 rounded-xl bg-amber-400 text-amber-950 font-black text-xs text-center shadow-lg animate-bounce">
+            {rewardToast}
+          </div>
+        )}
+
         {/* Navigation Tabs */}
-        <div className="flex rounded-xl bg-blue-950/80 p-1 border border-yellow-400/40 mb-4 overflow-x-auto">
+        <div className="flex rounded-xl bg-[#170529]/90 p-1 border border-amber-400/40 mb-4 overflow-x-auto">
           <button
             onClick={() => {
               sound.playTap();
               setActiveTab('settings');
             }}
-            className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               activeTab === 'settings'
-                ? 'bg-yellow-400 text-blue-950 shadow'
-                : 'text-blue-200 hover:text-white'
+                ? 'bg-gradient-to-b from-amber-300 to-yellow-500 text-amber-950 shadow-md'
+                : 'text-amber-200/80 hover:text-white'
             }`}
           >
-            Settings
+            Audio
           </button>
           <button
             onClick={() => {
               sound.playTap();
               setActiveTab('admob');
             }}
-            className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               activeTab === 'admob'
-                ? 'bg-yellow-400 text-blue-950 shadow'
-                : 'text-blue-200 hover:text-white'
+                ? 'bg-gradient-to-b from-amber-300 to-yellow-500 text-amber-950 shadow-md'
+                : 'text-amber-200/80 hover:text-white'
             }`}
           >
             AdMob & APK
@@ -126,10 +143,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               sound.playTap();
               setActiveTab('rules');
             }}
-            className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               activeTab === 'rules'
-                ? 'bg-yellow-400 text-blue-950 shadow'
-                : 'text-blue-200 hover:text-white'
+                ? 'bg-gradient-to-b from-amber-300 to-yellow-500 text-amber-950 shadow-md'
+                : 'text-amber-200/80 hover:text-white'
             }`}
           >
             Rules
@@ -139,10 +156,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               sound.playTap();
               setActiveTab('privacy');
             }}
-            className={`flex-1 py-1 px-2 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               activeTab === 'privacy'
-                ? 'bg-yellow-400 text-blue-950 shadow'
-                : 'text-blue-200 hover:text-white'
+                ? 'bg-gradient-to-b from-amber-300 to-yellow-500 text-amber-950 shadow-md'
+                : 'text-amber-200/80 hover:text-white'
             }`}
           >
             About
@@ -153,17 +170,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {activeTab === 'settings' && (
           <div className="flex flex-col gap-3">
             {/* Sound FX Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-950/60 border border-blue-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🔊</span>
+                <span className="text-2xl">🔊</span>
                 <div>
-                  <div className="text-sm font-bold">Sound Effects</div>
-                  <div className="text-[10px] text-blue-300">Match chimes, booms & fanfare</div>
+                  <div className="text-sm font-black text-amber-200">Sound Effects</div>
+                  <div className="text-[10px] text-purple-300">Match chimes, crystal blasts & fanfare</div>
                 </div>
               </div>
               <button
                 onClick={toggleSound}
-                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-yellow-300/40 ${
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-amber-300/50 ${
                   playerState.settings.sound ? 'bg-emerald-500' : 'bg-slate-700'
                 }`}
               >
@@ -176,17 +193,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             {/* Music Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-950/60 border border-blue-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🎵</span>
+                <span className="text-2xl">🎵</span>
                 <div>
-                  <div className="text-sm font-bold">Royal Music</div>
-                  <div className="text-[10px] text-blue-300">Ambient royal melodies</div>
+                  <div className="text-sm font-black text-amber-200">Royal Music</div>
+                  <div className="text-[10px] text-purple-300">Majestic Renaissance court harmony</div>
                 </div>
               </div>
               <button
                 onClick={toggleMusic}
-                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-yellow-300/40 ${
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-amber-300/50 ${
                   playerState.settings.music ? 'bg-emerald-500' : 'bg-slate-700'
                 }`}
               >
@@ -199,17 +216,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             {/* Vibration Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-950/60 border border-blue-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30">
               <div className="flex items-center gap-2">
-                <span className="text-xl">📳</span>
+                <span className="text-2xl">📳</span>
                 <div>
-                  <div className="text-sm font-bold">Vibration / Haptics</div>
-                  <div className="text-[10px] text-blue-300">Tactile match feedback</div>
+                  <div className="text-sm font-black text-amber-200">Tactile Haptics</div>
+                  <div className="text-[10px] text-purple-300">Haptic rumble feedback</div>
                 </div>
               </div>
               <button
                 onClick={toggleVibration}
-                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-yellow-300/40 ${
+                className={`w-14 h-8 rounded-full p-1 transition-colors duration-200 border border-amber-300/50 ${
                   playerState.settings.vibration ? 'bg-emerald-500' : 'bg-slate-700'
                 }`}
               >
@@ -229,14 +246,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onRestartLevel();
                   onClose();
                 }}
-                className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 border border-yellow-300 text-blue-950 font-black text-sm tracking-wide shadow-md active:scale-95 transition-transform"
+                className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 border border-amber-200 text-amber-950 font-black text-sm tracking-wide shadow-md active:scale-95 transition-transform"
               >
                 🔄 RESTART LEVEL
               </button>
             )}
 
             {/* Reset Progress */}
-            <div className="pt-2 border-t border-blue-800/80">
+            <div className="pt-2 border-t border-purple-800/60">
               {!showResetConfirm ? (
                 <button
                   onClick={() => setShowResetConfirm(true)}
@@ -278,18 +295,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 sound.playTap();
                 setShowApkModal(true);
               }}
-              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-amber-500 border-2 border-yellow-100 text-blue-950 font-black text-xs uppercase tracking-wider shadow active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 border-2 border-amber-200 text-amber-950 font-black text-xs uppercase tracking-wider shadow active:scale-95 transition-transform flex items-center justify-center gap-1.5"
             >
               <span>📥</span>
               <span>DOWNLOAD ANDROID APK (v1.0.0)</span>
             </button>
 
             {/* AdMob Mode Switcher */}
-            <div className="p-3 rounded-2xl bg-blue-950/70 border border-blue-800 flex flex-col gap-2">
+            <div className="p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-white text-xs">AdMob Mode</div>
-                  <div className="text-[10px] text-blue-300">
+                  <div className="font-black text-amber-200 text-xs">AdMob Mode</div>
+                  <div className="text-[10px] text-purple-300">
                     {admobConfig.testMode ? 'Using Google Sample Test IDs' : 'Using Live Production IDs'}
                   </div>
                 </div>
@@ -309,15 +326,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
 
               {/* Test Ad Buttons */}
-              <div className="pt-2 border-t border-blue-800/60 flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-yellow-300">Test Ad Placements:</span>
+              <div className="pt-2 border-t border-purple-800/60 flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold text-amber-300">Test Ad Placements:</span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     onClick={() => {
                       sound.playTap();
                       admobService.showInterstitial();
                     }}
-                    className="py-1.5 px-2 rounded-xl bg-blue-900 border border-blue-700 text-[10px] font-bold hover:bg-blue-800"
+                    className="py-1.5 px-2 rounded-xl bg-purple-900/80 border border-purple-600 text-[10px] font-bold text-amber-200 hover:bg-purple-800"
                   >
                     Test Interstitial
                   </button>
@@ -326,10 +343,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       sound.playTap();
                       admobService.showRewardedAd(
                         { type: 'coins', amount: 100 },
-                        () => alert('Reward granted: +100 Coins!')
+                        () => {
+                          setRewardToast('🎉 Reward Granted: +100 Coins!');
+                          setTimeout(() => setRewardToast(null), 3000);
+                        }
                       );
                     }}
-                    className="py-1.5 px-2 rounded-xl bg-blue-900 border border-blue-700 text-[10px] font-bold hover:bg-blue-800"
+                    className="py-1.5 px-2 rounded-xl bg-purple-900/80 border border-purple-600 text-[10px] font-bold text-amber-200 hover:bg-purple-800"
                   >
                     Test Rewarded Video
                   </button>
@@ -338,11 +358,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             {/* Custom Ad IDs Configuration Inputs */}
-            <div className="p-3 rounded-2xl bg-blue-950/70 border border-blue-800 flex flex-col gap-2">
-              <span className="font-bold text-yellow-300 text-[11px]">Android Ad Unit IDs:</span>
+            <div className="p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30 flex flex-col gap-2">
+              <span className="font-bold text-amber-300 text-[11px]">Android Ad Unit IDs:</span>
               
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] text-blue-300">Banner Unit ID:</label>
+                <label className="text-[9px] text-purple-300">Banner Unit ID:</label>
                 <input
                   type="text"
                   value={admobConfig.banner.android}
@@ -350,12 +370,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     ...prev,
                     banner: { ...prev.banner, android: e.target.value }
                   }))}
-                  className="px-2 py-1 rounded-lg bg-blue-950 border border-blue-700 text-white font-mono text-[10px]"
+                  className="px-2 py-1 rounded-lg bg-[#110321] border border-purple-700 text-white font-mono text-[10px]"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] text-blue-300">Interstitial Unit ID:</label>
+                <label className="text-[9px] text-purple-300">Interstitial Unit ID:</label>
                 <input
                   type="text"
                   value={admobConfig.interstitial.android}
@@ -363,12 +383,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     ...prev,
                     interstitial: { ...prev.interstitial, android: e.target.value }
                   }))}
-                  className="px-2 py-1 rounded-lg bg-blue-950 border border-blue-700 text-white font-mono text-[10px]"
+                  className="px-2 py-1 rounded-lg bg-[#110321] border border-purple-700 text-white font-mono text-[10px]"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[9px] text-blue-300">Rewarded Unit ID:</label>
+                <label className="text-[9px] text-purple-300">Rewarded Unit ID:</label>
                 <input
                   type="text"
                   value={admobConfig.rewarded.android}
@@ -376,7 +396,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     ...prev,
                     rewarded: { ...prev.rewarded, android: e.target.value }
                   }))}
-                  className="px-2 py-1 rounded-lg bg-blue-950 border border-blue-700 text-white font-mono text-[10px]"
+                  className="px-2 py-1 rounded-lg bg-[#110321] border border-purple-700 text-white font-mono text-[10px]"
                 />
               </div>
 
@@ -392,25 +412,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Tab 3: Rules & Booster Combos */}
         {activeTab === 'rules' && (
-          <div className="max-h-72 overflow-y-auto pr-1 flex flex-col gap-2.5 text-xs text-blue-100">
-            <div className="p-2 rounded-xl bg-blue-950/80 border border-blue-800">
-              <span className="font-bold text-yellow-300 block mb-0.5">🚀 Rocket (Match 4)</span>
-              Clears an entire row or column. Directly damages obstacles in its line of flight!
+          <div className="max-h-72 overflow-y-auto pr-1 flex flex-col gap-2.5 text-xs text-amber-100">
+            <div className="p-2.5 rounded-xl bg-[#1b0830]/80 border border-amber-400/30">
+              <span className="font-bold text-amber-300 block mb-0.5">🚀 Royal Rocket (Match 4)</span>
+              Clears an entire row or column. Directly blasts obstacles in its trajectory!
             </div>
-            <div className="p-2 rounded-xl bg-blue-950/80 border border-blue-800">
-              <span className="font-bold text-yellow-300 block mb-0.5">💣 TNT Bomb (T or L Match)</span>
-              Explodes a 3x3 radius and delivers heavy damage to nearby stone and crates!
+            <div className="p-2.5 rounded-xl bg-[#1b0830]/80 border border-amber-400/30">
+              <span className="font-bold text-amber-300 block mb-0.5">💣 TNT Bomb (T or L Match)</span>
+              Explodes a 3x3 radius and shatters nearby royal chests, stone, and crates!
             </div>
-            <div className="p-2 rounded-xl bg-blue-950/80 border border-blue-800">
-              <span className="font-bold text-yellow-300 block mb-0.5">🌈 Rainbow Orb (Match 5)</span>
-              Swap with any colored piece to clear ALL pieces of that color from the entire board!
+            <div className="p-2.5 rounded-xl bg-[#1b0830]/80 border border-amber-400/30">
+              <span className="font-bold text-amber-300 block mb-0.5">🌈 Rainbow Orb (Match 5)</span>
+              Swap with any colored jewel to clear ALL gems of that color from the entire board!
             </div>
-            <div className="p-2 rounded-xl bg-blue-950/80 border border-blue-800">
-              <span className="font-bold text-amber-300 block mb-0.5">✨ Mega Combos</span>
-              Swap two boosters together (e.g. Rocket + TNT, Rainbow + Rainbow) for massive board-clearing chain reactions!
+            <div className="p-2.5 rounded-xl bg-[#1b0830]/80 border border-amber-400/30">
+              <span className="font-bold text-yellow-300 block mb-0.5">✨ Royal Combos</span>
+              Swap two boosters together (e.g. Rocket + TNT, Rainbow + Rainbow) for spectacular board-clearing cascades!
             </div>
-            <div className="p-2 rounded-xl bg-blue-950/80 border border-blue-800">
-              <span className="font-bold text-yellow-300 block mb-0.5">📦 Obstacles</span>
+            <div className="p-2.5 rounded-xl bg-[#1b0830]/80 border border-amber-400/30">
+              <span className="font-bold text-amber-300 block mb-0.5">📦 Obstacles</span>
               Break wooden boxes, royal crown chests, and granite stones by matching pieces next to them or using boosters!
             </div>
           </div>
@@ -418,17 +438,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Tab 4: Privacy & About */}
         {activeTab === 'privacy' && (
-          <div className="flex flex-col gap-3 text-xs text-blue-200">
-            <div className="p-3 rounded-2xl bg-blue-950/80 border border-blue-800 flex flex-col gap-1 text-center">
-              <div className="font-black text-yellow-300 text-sm">Royal Dream Match</div>
+          <div className="flex flex-col gap-3 text-xs text-purple-200">
+            <div className="p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30 flex flex-col gap-1 text-center">
+              <div className="font-black text-amber-300 text-sm">Royal Dream Match</div>
               <div>Package: <span className="font-mono text-white">com.royaldream.match</span></div>
               <div>Version 1.0.0 (Capacitor Android)</div>
-              <div className="text-[10px] text-blue-300 mt-1">
+              <div className="text-[10px] text-purple-300 mt-1">
                 Built with Node.js 22 and Java 21. Integrated with Google AdMob & Capacitor Android build engine.
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-blue-950/60 border border-blue-800 text-[11px] leading-relaxed">
+            <div className="p-3 rounded-2xl bg-[#1b0830]/60 border border-purple-800 text-[11px] leading-relaxed">
               <span className="font-bold text-white block mb-1">Privacy & Ad Policy</span>
               Royal Dream Match adheres strictly to Google AdMob and Google Play Family policies. Advertisements are non-intrusive, do not obstruct puzzle gameplay, and all user game data is stored securely and privately on device via LocalStorage.
             </div>

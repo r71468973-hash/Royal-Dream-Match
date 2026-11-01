@@ -36,10 +36,10 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300 select-none">
-      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-blue-950 via-slate-900 to-indigo-950 border-4 border-red-500 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.9)] text-white flex flex-col items-center text-center">
+      <div className="relative w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#2e0854] via-[#1a0433] to-[#0f0220] border-4 border-rose-500 p-6 shadow-[0_16px_40px_rgba(0,0,0,0.9),inset_0_2px_4px_rgba(244,63,94,0.3)] text-white flex flex-col items-center text-center">
         
         {/* Out of Moves Ribbon */}
-        <div className="relative -mt-10 px-6 py-2 rounded-2xl bg-gradient-to-r from-red-600 via-rose-500 to-red-700 border-2 border-white shadow-xl flex items-center justify-center gap-2">
+        <div className="relative -mt-11 px-6 py-2 rounded-2xl bg-gradient-to-r from-red-600 via-rose-500 to-red-700 border-2 border-white shadow-xl flex items-center justify-center gap-2">
           <span className="text-xl">💔</span>
           <span
             className="text-xl font-black text-white uppercase tracking-wider drop-shadow"
@@ -50,7 +50,7 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
           <span className="text-xl">💔</span>
         </div>
 
-        {/* Sad Crying King */}
+        {/* Sad King */}
         <div className="my-3">
           <KingAvatar mood="sad" size="lg" />
         </div>
@@ -58,13 +58,13 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
         <div className="text-xs font-bold text-rose-300 uppercase tracking-widest mb-1">
           Level {levelNumber} Incomplete
         </div>
-        <p className="text-xs text-slate-300 mb-3">
+        <p className="text-xs text-purple-200/90 mb-3 font-medium">
           King Leo needs your help to finish the royal targets!
         </p>
 
         {/* Remaining Targets needed */}
-        <div className="w-full bg-blue-900/40 rounded-2xl p-3 border border-red-500/30 mb-4 flex flex-col gap-2">
-          <div className="text-[10px] font-bold text-yellow-300 uppercase tracking-wider">
+        <div className="w-full bg-purple-950/70 rounded-2xl p-3 border border-rose-500/30 mb-4 flex flex-col gap-2">
+          <div className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
             Targets Remaining
           </div>
           <div className="flex justify-center gap-3">
@@ -72,7 +72,7 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
               const remaining = Math.max(0, tgt.count - tgt.current);
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
-                  <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-yellow-300/40 p-1 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-purple-900/80 border border-amber-300/40 p-1 flex items-center justify-center shadow">
                     {tgt.type === 'wood' && (
                       <div className="w-6 h-6 rounded bg-amber-800 border border-amber-500" />
                     )}
@@ -99,21 +99,21 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
 
         {/* Actions */}
         <div className="w-full flex flex-col gap-2.5">
-          {/* AdMob Rewarded Ad Option: +5 Free Moves */}
+          {/* Watch Ad for +5 Moves */}
           {onWatchAdForMoves && (
             <button
               onClick={() => {
                 sound.playTap();
                 onWatchAdForMoves();
               }}
-              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 border-2 border-emerald-300 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 border-2 border-emerald-300 text-white font-black text-xs uppercase tracking-wider shadow-[0_4px_0_#064e3b] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span className="text-sm">🎬</span>
-              <span>Watch Ad for +5 Moves (Free)</span>
+              <span>🎬</span>
+              <span>Watch Video (+5 Free Moves)</span>
             </button>
           )}
 
-          {/* Rescue Option: +5 Moves for 100 Coins */}
+          {/* Buy Extra Moves with Coins */}
           <button
             onClick={() => {
               if (canAffordExtraMoves) {
@@ -121,40 +121,40 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
                 onBuyExtraMoves();
               } else {
                 sound.playInvalid();
-                alert('Not enough coins! You need 100 coins to buy +5 moves.');
               }
             }}
-            className={`w-full py-2.5 rounded-2xl border-2 flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform ${
+            disabled={!canAffordExtraMoves}
+            className={`w-full py-3 rounded-2xl border-2 transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-wider ${
               canAffordExtraMoves
-                ? 'bg-gradient-to-b from-yellow-300 via-amber-400 to-amber-600 border-yellow-100 text-blue-950 font-black text-xs'
-                : 'bg-slate-800 border-slate-600 text-slate-400 font-bold text-xs opacity-60'
+                ? 'bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-600 text-purple-950 border-yellow-200 shadow-[0_4px_0_#92400e] active:translate-y-1 active:shadow-none cursor-pointer'
+                : 'bg-purple-950/40 text-purple-400 border-purple-800 opacity-50 cursor-not-allowed'
             }`}
           >
-            <span className="text-sm">⏳ +5 Extra Moves</span>
-            <span className="px-2 py-0.5 rounded-full bg-black/20 text-[10px]">
-              🪙 100
-            </span>
+            <span>🪙</span>
+            <span>Get +5 Moves (100 Coins)</span>
           </button>
 
-          {/* Retry Level */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full mt-1">
+            {/* Retry Button */}
             <button
               onClick={() => {
                 sound.playTap();
                 onRetry();
               }}
-              className="flex-1 py-2.5 rounded-xl bg-blue-900 border border-yellow-400/60 text-white font-bold text-xs active:scale-95 transition-transform flex items-center justify-center gap-1"
+              className="flex-1 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/50 text-purple-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all"
             >
-              <span>🔄</span> Retry (-1 ❤️)
+              🔄 Retry
             </button>
+
+            {/* Quit Button */}
             <button
               onClick={() => {
                 sound.playTap();
                 onQuit();
               }}
-              className="flex-1 py-2.5 rounded-xl bg-slate-800 border border-slate-600 text-slate-300 font-bold text-xs active:scale-95 transition-transform flex items-center justify-center gap-1"
+              className="flex-1 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/50 text-purple-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all"
             >
-              <span>🏰</span> Give Up
+              🏰 Map
             </button>
           </div>
         </div>
