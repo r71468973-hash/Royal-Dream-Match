@@ -117,21 +117,33 @@ jobs:
       - name: Configure Keystore for Release Signing
         run: |
           mkdir -p android/app
-          if [ ! -f android/app/debug.keystore ]; then
-            echo "Generating release signing keystore..."
-            keytool -genkey -v -keystore android/app/debug.keystore -alias androiddebugkey -keypass android -storepass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=RoyalDreamMatch,OU=Game,O=RoyalMatch,C=US"
+          if [ ! -f android/app/royal-dream-match-release.keystore ]; then
+            echo "Generating production release signing keystore..."
+            keytool -genkey -v -keystore android/app/royal-dream-match-release.keystore -alias royaldreammatch -keypass RoyalMatch2026Production! -storepass RoyalMatch2026Production! -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Royal Dream Match,OU=Production,O=Royal Dream Match,C=US"
           fi
-          echo "Keystore is ready at android/app/debug.keystore"
+          echo "Production keystore is ready at android/app/royal-dream-match-release.keystore"
+        env:
+          RELEASE_STORE_PASSWORD: RoyalMatch2026Production!
+          RELEASE_KEY_ALIAS: royaldreammatch
+          RELEASE_KEY_PASSWORD: RoyalMatch2026Production!
 
       - name: Build Release APK
         run: |
           cd android
           ./gradlew assembleRelease --no-daemon -x lint -x test --stacktrace
+        env:
+          RELEASE_STORE_PASSWORD: RoyalMatch2026Production!
+          RELEASE_KEY_ALIAS: royaldreammatch
+          RELEASE_KEY_PASSWORD: RoyalMatch2026Production!
 
-      - name: Build Release AAB
+      - name: Build Release AAB (Android App Bundle for Google Play Console)
         run: |
           cd android
           ./gradlew bundleRelease --no-daemon -x lint -x test --stacktrace
+        env:
+          RELEASE_STORE_PASSWORD: RoyalMatch2026Production!
+          RELEASE_KEY_ALIAS: royaldreammatch
+          RELEASE_KEY_PASSWORD: RoyalMatch2026Production!
 
       - name: Package Artifacts
         run: |
@@ -153,6 +165,12 @@ jobs:
             cp android/app/build/outputs/bundle/release/app-release-unsigned.aab build-artifacts/Royal-Dream-Match.aab
           fi
 
+          # Package Live OTA Web Bundle
+          cd dist
+          zip -r ../build-artifacts/dist-ota-latest.zip .
+          cd ..
+          cp public/ota-manifest.json build-artifacts/ota-manifest.json
+
           echo "Generated build artifacts:"
           ls -la build-artifacts/
 
@@ -173,7 +191,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-      - name: Automatic GitHub Release with APK & AAB
+      - name: Automatic GitHub Release with APK, AAB & OTA Bundle
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         continue-on-error: true
@@ -181,15 +199,18 @@ jobs:
           files: |
             build-artifacts/Royal-Dream-Match.apk
             build-artifacts/Royal-Dream-Match.aab
+            build-artifacts/dist-ota-latest.zip
+            build-artifacts/ota-manifest.json
           name: Royal Dream Match ${{ github.ref_name || 'v1.0.0' }}
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.0' }}
           body: |
-            ## 👑 Royal Dream Match Android APK
+            ## 👑 Royal Dream Match Android Release & Live OTA Bundle
             
             - **APK File**: `Royal-Dream-Match.apk`
+            - **AAB File**: `Royal-Dream-Match.aab` (Google Play Console ready)
+            - **Live OTA Bundle**: `dist-ota-latest.zip` & `ota-manifest.json` (instant live update for already-installed APKs!)
             - **Package Name**: `com.royaldream.match`
             - **Version**: `1.0.0`
-            - **Launcher Icon**: 👑 Golden Royal Crown with Match-3 Jewels (512x512 adaptive icon)
             - **Built with**: Node.js 22 LTS, Java 21, and Capacitor Android
             
             ### Installation:

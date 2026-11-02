@@ -9,6 +9,7 @@ import { getLevelConfig } from '../game/levels';
 import { sound } from '../game/sound';
 import { PieceView } from './PieceView';
 import { RoyalAlertModal } from './RoyalAlertModal';
+import { AdMobBanner } from './AdMobBanner';
 
 interface LevelMapScreenProps {
   playerState: PlayerState;
@@ -209,6 +210,11 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Google AdMob Banner at Bottom */}
+      <div className="relative z-10 w-full shrink-0">
+        <AdMobBanner />
       </div>
 
       {/* Level Preview Modal */}

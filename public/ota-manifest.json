@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "build": 1,
+  "channel": "production",
+  "releaseDate": "2026-11-01T13:10:00Z",
+  "mandatory": false,
+  "bundleUrl": "https://raw.githubusercontent.com/r71468973/royal-dream-match/main/dist-ota-latest.zip",
+  "checksum": "sha256-baseline-1.0.0",
+  "releaseNotes": "👑 Royal Dream Match with 100 royal levels, Google AdMob Banner integration, and instant touch controls."
+}

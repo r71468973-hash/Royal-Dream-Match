@@ -58,48 +58,37 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
         <div className="text-xs font-bold text-rose-300 uppercase tracking-widest mb-1">
           Level {levelNumber} Incomplete
         </div>
-        <p className="text-xs text-purple-200/90 mb-3 font-medium">
-          King Leo needs your help to finish the royal targets!
+        <p className="text-xs text-purple-200 mb-4 max-w-[240px]">
+          The King is waiting for his royal victory! Continue playing?
         </p>
 
-        {/* Remaining Targets needed */}
-        <div className="w-full bg-purple-950/70 rounded-2xl p-3 border border-rose-500/30 mb-4 flex flex-col gap-2">
-          <div className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-            Targets Remaining
-          </div>
-          <div className="flex justify-center gap-3">
-            {unmetTargets.map((tgt, i) => {
-              const remaining = Math.max(0, tgt.count - tgt.current);
-              return (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <div className="w-10 h-10 rounded-xl bg-purple-900/80 border border-amber-300/40 p-1 flex items-center justify-center shadow">
-                    {tgt.type === 'wood' && (
-                      <div className="w-6 h-6 rounded bg-amber-800 border border-amber-500" />
-                    )}
-                    {tgt.type === 'crown_box' && (
-                      <div className="w-6 h-6 rounded bg-yellow-500 border border-yellow-200 flex items-center justify-center text-xs">
-                        👑
-                      </div>
-                    )}
-                    {tgt.type === 'stone' && (
-                      <div className="w-6 h-6 rounded bg-slate-600 border border-slate-400" />
-                    )}
-                    {['ruby', 'shield', 'leaf', 'crown', 'gem'].includes(tgt.type) && (
-                      <PieceView piece={tgt.type as any} />
-                    )}
+        {/* Remaining Unmet Targets Display */}
+        {unmetTargets.length > 0 && (
+          <div className="w-full bg-[#1b0830]/90 rounded-2xl p-3 border border-purple-800/80 mb-4 flex flex-col items-center gap-2">
+            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+              Targets Remaining
+            </span>
+            <div className="flex justify-center items-center gap-4 flex-wrap">
+              {unmetTargets.map((target, idx) => {
+                const remaining = Math.max(0, target.count - target.current);
+                return (
+                  <div key={idx} className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-purple-700/60">
+                    <div className="w-6 h-6 flex items-center justify-center">
+                      <PieceView piece={target.type as any} size={24} />
+                    </div>
+                    <span className="text-xs font-black text-amber-200">
+                      x{remaining}
+                    </span>
                   </div>
-                  <span className="text-xs font-black text-rose-300">
-                    {remaining} left
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Actions */}
+        {/* Action Buttons */}
         <div className="w-full flex flex-col gap-2.5">
-          {/* Watch Ad for +5 Moves */}
+          {/* Watch Ad for +5 Free Moves */}
           {onWatchAdForMoves && (
             <button
               onClick={() => {
@@ -143,18 +132,18 @@ export const LevelFailedModal: React.FC<LevelFailedModalProps> = ({
               }}
               className="flex-1 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/50 text-purple-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all"
             >
-              🔄 Retry
+              🔄 Retry Level
             </button>
 
-            {/* Quit Button */}
+            {/* Quit to Map/Home Button */}
             <button
               onClick={() => {
                 sound.playTap();
                 onQuit();
               }}
-              className="flex-1 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/50 text-purple-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all"
+              className="flex-1 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 border border-rose-500/50 text-rose-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all"
             >
-              🏰 Map
+              🚪 Exit Level
             </button>
           </div>
         </div>

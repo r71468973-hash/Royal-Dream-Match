@@ -8,8 +8,8 @@ import { PlayerState } from '../types/game';
 import { KingAvatar } from './KingAvatar';
 import { RoyalLogo } from './RoyalLogo';
 import { sound } from '../game/sound';
-import { admobService } from '../services/admobService';
 import { AdMobBanner } from './AdMobBanner';
+import { rewardedAdService } from '../services/rewardedAdService';
 import { ApkDownloadModal } from './ApkDownloadModal';
 import { RoyalAlertModal } from './RoyalAlertModal';
 
@@ -82,12 +82,56 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleWatchAdForCoins = () => {
     sound.playTap();
-    admobService.showRewardedAd(
-      { type: 'coins', amount: 100 },
+    rewardedAdService.showRewardedAd(
+      {
+        type: 'coins',
+        amount: 100,
+        title: '100 Gold Coins',
+        description: 'Watch a short video to claim +100 Royal Gold Coins!',
+      },
       () => {
+        sound.playCoin();
         onUpdateState({
           ...playerState,
           coins: playerState.coins + 100,
+        });
+        setAlertState({
+          title: 'Coins Received!',
+          message: '+100 Royal Gold Coins have been added to your treasury!',
+          icon: '🪙',
+        });
+      }
+    );
+  };
+
+  const handleWatchAdForLife = () => {
+    sound.playTap();
+    if (playerState.lives >= playerState.maxLives) {
+      setAlertState({
+        title: 'Lives Full!',
+        message: 'Your royal lives are already at maximum (5/5)!',
+        icon: '❤️',
+      });
+      return;
+    }
+
+    rewardedAdService.showRewardedAd(
+      {
+        type: 'lives',
+        amount: 1,
+        title: 'Extra Royal Life',
+        description: 'Watch a short video to restore +1 Royal Heart!',
+      },
+      () => {
+        const nextLives = Math.min(playerState.maxLives, playerState.lives + 1);
+        onUpdateState({
+          ...playerState,
+          lives: nextLives,
+        });
+        setAlertState({
+          title: 'Life Restored!',
+          message: '+1 Royal Life has been replenished!',
+          icon: '❤️',
         });
       }
     );
@@ -125,20 +169,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Currency Pods */}
         <div className="flex items-center gap-2">
-          {/* Lives */}
-          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-rose-950/85 border border-rose-500/80 shadow-[0_4px_12px_rgba(244,63,94,0.3)]">
+          {/* Lives (Clickable to refill via video ad) */}
+          <button
+            onClick={handleWatchAdForLife}
+            className="flex items-center gap-1 px-3 py-1 rounded-full bg-rose-950/85 hover:bg-rose-900 border border-rose-500/80 shadow-[0_4px_12px_rgba(244,63,94,0.3)] active:scale-95 transition-transform"
+            title="Watch video for +1 Life"
+          >
             <span className="text-xs">❤️</span>
             <div className="flex flex-col items-center">
               <span className="text-xs font-black text-white leading-none">
                 {playerState.lives}/{playerState.maxLives}
               </span>
-              {playerState.lives < playerState.maxLives && (
-                <span className="text-[8px] font-bold text-rose-300 leading-none">
-                  {lifeCountdown}
+              {playerState.lives < playerState.maxLives ? (
+                <span className="text-[7px] font-black text-emerald-300 leading-none mt-0.5">
+                  +Free Ad
                 </span>
-              )}
+              ) : null}
             </div>
-          </div>
+          </button>
 
           {/* Coins */}
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/85 border border-amber-400/80 shadow-[0_4px_12px_rgba(245,158,11,0.3)]">
@@ -169,14 +217,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* Main Buttons / Controls */}
       <div className="relative z-10 flex flex-col items-center gap-2.5 w-full max-w-sm mx-auto mb-1">
         
-        {/* Rewarded Ad & APK Download Row */}
-        <div className="flex items-center justify-between gap-2.5 w-full">
+        {/* Rewarded Ads Action Row (Coins, Lives, APK) */}
+        <div className="grid grid-cols-3 gap-2 w-full">
           <button
             onClick={handleWatchAdForCoins}
-            className="flex-1 py-2 px-2 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-700 border border-emerald-300 text-white font-black text-[11px] shadow-[0_3px_0_#064e3b] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+            className="py-2 px-1.5 rounded-2xl bg-gradient-to-b from-amber-400 to-yellow-600 border border-yellow-200 text-purple-950 font-black text-[10px] shadow-[0_3px_0_#92400e] active:translate-y-0.5 active:shadow-none transition-all flex flex-col items-center justify-center gap-0.5"
           >
-            <span>🎬</span>
-            <span>Free Coins (+100)</span>
+            <span className="text-sm">🎬 🪙</span>
+            <span>+100 Coins</span>
+          </button>
+
+          <button
+            onClick={handleWatchAdForLife}
+            className="py-2 px-1.5 rounded-2xl bg-gradient-to-b from-rose-500 to-red-700 border border-rose-300 text-white font-black text-[10px] shadow-[0_3px_0_#881337] active:translate-y-0.5 active:shadow-none transition-all flex flex-col items-center justify-center gap-0.5"
+          >
+            <span className="text-sm">🎬 ❤️</span>
+            <span>+1 Free Life</span>
           </button>
 
           <button
@@ -184,10 +240,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               sound.playTap();
               setShowApkModal(true);
             }}
-            className="flex-1 py-2 px-2 rounded-2xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-amber-400 text-amber-200 font-black text-[11px] shadow-[0_3px_0_#2e1065] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+            className="py-2 px-1.5 rounded-2xl bg-gradient-to-b from-purple-700 to-indigo-900 border border-amber-400 text-amber-200 font-black text-[10px] shadow-[0_3px_0_#2e1065] active:translate-y-0.5 active:shadow-none transition-all flex flex-col items-center justify-center gap-0.5"
           >
-            <span>👑</span>
-            <span>Download APK</span>
+            <span className="text-sm">📥 👑</span>
+            <span>Store Hub</span>
           </button>
         </div>
 
@@ -268,8 +324,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* AdMob Banner at Bottom */}
-      <div className="relative z-10 w-full mt-1">
+      {/* Google AdMob Banner at Bottom */}
+      <div className="relative z-10 w-full mt-1 shrink-0">
         <AdMobBanner />
       </div>
 

@@ -8,15 +8,16 @@ import { PlayerState, ScreenType } from './types/game';
 import { loadPlayerState, savePlayerState } from './game/storage';
 import { getLevelConfig } from './game/levels';
 import { sound } from './game/sound';
-import { admobService, AdReward } from './services/admobService';
 import { SplashScreen } from './components/SplashScreen';
 import { HomeScreen } from './components/HomeScreen';
 import { LevelMapScreen } from './components/LevelMapScreen';
 import { GameplayScreen } from './components/GameplayScreen';
 import { DailyRewardsModal } from './components/DailyRewardsModal';
 import { SettingsModal } from './components/SettingsModal';
-import { AdMobInterstitialModal } from './components/AdMobInterstitialModal';
+import { LiveUpdateModal } from './components/LiveUpdateModal';
+import { otaService, OtaState } from './services/otaService';
 import { AdMobRewardedModal } from './components/AdMobRewardedModal';
+import { rewardedAdService, RewardedAdState } from './services/rewardedAdService';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('splash');
@@ -24,17 +25,9 @@ export default function App() {
   const [activePlayingLevel, setActivePlayingLevel] = useState<number>(1);
   const [showDailyRewardsModal, setShowDailyRewardsModal] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
-
-  // Global AdMob Modals State
-  const [interstitialState, setInterstitialState] = useState<{ active: boolean; countdown: number }>({
-    active: false,
-    countdown: 5,
-  });
-  const [rewardedState, setRewardedState] = useState<{ active: boolean; reward: AdReward | null; countdown: number }>({
-    active: false,
-    reward: null,
-    countdown: 5,
-  });
+  const [otaState, setOtaState] = useState<OtaState>(() => otaService.getState());
+  const [showOtaModal, setShowOtaModal] = useState<boolean>(false);
+  const [rewardedAdState, setRewardedAdState] = useState<RewardedAdState>(() => rewardedAdService.getState());
 
   // Sync sound settings with SoundManager
   useEffect(() => {
@@ -42,15 +35,23 @@ export default function App() {
     sound.setMusicEnabled(playerState.settings.music);
   }, [playerState.settings.sound, playerState.settings.music]);
 
-  // Register AdMob Listeners
+  // Register OTA Update Listener
   useEffect(() => {
-    admobService.registerInterstitialListener((active, countdown) => {
-      setInterstitialState({ active, countdown });
+    const unsubscribeOta = otaService.subscribe((state) => {
+      setOtaState(state);
+      if (state.status === 'available' && state.availableUpdate) {
+        setShowOtaModal(true);
+      }
     });
 
-    admobService.registerRewardedListener((active, reward, countdown) => {
-      setRewardedState({ active, reward, countdown });
+    const unsubscribeRewarded = rewardedAdService.subscribe((state) => {
+      setRewardedAdState(state);
     });
+
+    return () => {
+      unsubscribeOta();
+      unsubscribeRewarded();
+    };
   }, []);
 
   // Save state changes to LocalStorage
@@ -96,9 +97,6 @@ export default function App() {
 
     handleUpdatePlayerState(updatedState);
     setActivePlayingLevel(nextCurrentLevel);
-
-    // Show Interstitial ad if cooldown period has elapsed (policy compliant)
-    admobService.showInterstitial();
   };
 
   // Level Fail Handler (deducts 1 life)
@@ -180,20 +178,22 @@ export default function App() {
           />
         )}
 
-        {/* AdMob Interstitial Modal */}
-        {interstitialState.active && (
-          <AdMobInterstitialModal
-            countdown={interstitialState.countdown}
-            onClose={() => admobService.closeInterstitial()}
+        {/* OTA Live Update Modal */}
+        {showOtaModal && otaState.availableUpdate && (
+          <LiveUpdateModal
+            manifest={otaState.availableUpdate}
+            otaState={otaState}
+            onClose={() => setShowOtaModal(false)}
           />
         )}
 
-        {/* AdMob Rewarded Video Modal */}
-        {rewardedState.active && rewardedState.reward && (
+        {/* AdMob Rewarded Video Ad Modal */}
+        {rewardedAdState.active && rewardedAdState.reward && (
           <AdMobRewardedModal
-            reward={rewardedState.reward}
-            countdown={rewardedState.countdown}
-            onClose={() => admobService.cancelRewardedAd()}
+            reward={rewardedAdState.reward}
+            countdown={rewardedAdState.countdown}
+            status={rewardedAdState.status}
+            onClose={() => rewardedAdService.cancelRewardedAd()}
           />
         )}
       </div>

@@ -1,0 +1,123 @@
+name: Publish Live OTA Update (Royal Dream Match)
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'vite.config.ts'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New Version Name (e.g. 1.0.1)'
+        required: false
+        default: '1.0.1'
+      release_notes:
+        description: 'Release Notes for in-game notification'
+        required: false
+        default: '👑 New levels and royal enhancements live update!'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-ota:
+    name: Build & Publish Live OTA Update
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Safely Install Node Dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+          else
+            npm install --legacy-peer-deps
+          fi
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Package Live OTA Web Bundle
+        id: package-ota
+        run: |
+          mkdir -p ota-release
+          cd dist
+          zip -r ../ota-release/dist-ota-latest.zip .
+          cd ..
+
+          # Compute SHA-256 Checksum
+          CHECKSUM=$(sha256sum ota-release/dist-ota-latest.zip | awk '{print $1}')
+          BUILD_NUM=${{ github.run_number }}
+          VERSION="${{ github.event.inputs.version || '1.0.1' }}"
+          NOTES="${{ github.event.inputs.release_notes || '👑 Live OTA update with new levels and visual enhancements!' }}"
+          DATE_NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          echo "Generated bundle checksum: $CHECKSUM"
+          echo "Build number: $BUILD_NUM"
+
+          # Write dynamic ota-manifest.json
+          cat <<EOF > ota-release/ota-manifest.json
+          {
+            "version": "$VERSION",
+            "build": $BUILD_NUM,
+            "channel": "production",
+            "releaseDate": "$DATE_NOW",
+            "mandatory": false,
+            "bundleUrl": "https://raw.githubusercontent.com/${{ github.repository }}/main/dist-ota-latest.zip",
+            "checksum": "$CHECKSUM",
+            "releaseNotes": "$NOTES"
+          }
+          EOF
+
+          # Format JSON cleanly
+          python3 -m json.tool ota-release/ota-manifest.json > ota-release/ota-manifest.formatted.json
+          mv ota-release/ota-manifest.formatted.json ota-release/ota-manifest.json
+          cp ota-release/ota-manifest.json public/ota-manifest.json
+          cp ota-release/dist-ota-latest.zip ./dist-ota-latest.zip
+
+          echo "Manifest content:"
+          cat ota-release/ota-manifest.json
+
+      - name: Upload OTA Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Royal-Dream-Match-OTA-Bundle
+          path: |
+            ota-release/dist-ota-latest.zip
+            ota-release/ota-manifest.json
+          retention-days: 60
+
+      - name: Publish OTA Release to GitHub
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          tag_name: ota-latest
+          name: Royal Dream Match Live OTA Update
+          files: |
+            ota-release/dist-ota-latest.zip
+            ota-release/ota-manifest.json
+          body: |
+            ## 👑 Royal Dream Match – Live OTA Update
+            
+            This Over-The-Air (OTA) update is automatically delivered to all installed Android APKs without requiring a new APK download from the Play Store!
+            
+            - **Live Version**: `${{ github.event.inputs.version || '1.0.1' }}`
+            - **Build**: `${{ github.run_number }}`
+            - **Delivered Web Assets**: HTML5, CSS, TypeScript runtime, 100 level blueprints, royal palace backgrounds, and audio effects.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

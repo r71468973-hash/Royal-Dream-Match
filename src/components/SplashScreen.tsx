@@ -5,6 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { RoyalLogo } from './RoyalLogo';
+import { otaService } from '../services/otaService';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -12,10 +13,20 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const [progress, setProgress] = useState(0);
+  const [otaStatusText, setOtaStatusText] = useState('Loading Royal Realm...');
 
   useEffect(() => {
+    // 1. Kick off background non-blocking OTA update check
+    otaService.checkForUpdates(true).then((update) => {
+      if (update) {
+        setOtaStatusText(`Update Found (v${update.version})!`);
+      }
+    }).catch(() => {
+      // ignore network errors on splash
+    });
+
     const startTime = Date.now();
-    const duration = 1600;
+    const duration = 1500;
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -86,7 +97,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         </div>
 
         <div className="flex justify-between w-full px-2 text-xs font-black text-amber-200/90">
-          <span>Loading Royal Realm...</span>
+          <span className="truncate max-w-[200px]">{otaStatusText}</span>
           <span>{progress}%</span>
         </div>
       </div>

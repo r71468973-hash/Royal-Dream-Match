@@ -8,7 +8,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,12 +18,20 @@ android {
     }
     signingConfigs {
         release {
-            def ksFile = file('debug.keystore')
-            if (ksFile.exists()) {
-                storeFile ksFile
-                storePassword 'android'
-                keyAlias 'androiddebugkey'
-                keyPassword 'android'
+            def prodKs = file('royal-dream-match-release.keystore')
+            if (prodKs.exists()) {
+                storeFile prodKs
+                storePassword System.getenv('RELEASE_STORE_PASSWORD') ?: 'RoyalMatch2026Production!'
+                keyAlias System.getenv('RELEASE_KEY_ALIAS') ?: 'royaldreammatch'
+                keyPassword System.getenv('RELEASE_KEY_PASSWORD') ?: 'RoyalMatch2026Production!'
+            } else {
+                def ksFile = file('debug.keystore')
+                if (ksFile.exists()) {
+                    storeFile ksFile
+                    storePassword 'android'
+                    keyAlias 'androiddebugkey'
+                    keyPassword 'android'
+                }
             }
         }
     }
@@ -52,7 +60,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    // Google AdMob
+    // Google Mobile Ads (AdMob) SDK
     implementation 'com.google.android.gms:play-services-ads:23.0.0'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

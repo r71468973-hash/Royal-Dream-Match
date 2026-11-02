@@ -33,7 +33,7 @@ import { LevelCompletedModal } from './LevelCompletedModal';
 import { LevelFailedModal } from './LevelFailedModal';
 import { PauseModal } from './PauseModal';
 import { RoyalAlertModal } from './RoyalAlertModal';
-import { admobService } from '../services/admobService';
+import { rewardedAdService } from '../services/rewardedAdService';
 
 interface GameplayScreenProps {
   levelConfig: LevelConfig;
@@ -984,8 +984,13 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({
           unmetTargets={targets.filter(t => t.current < t.count)}
           coins={playerState.coins}
           onWatchAdForMoves={() => {
-            admobService.showRewardedAd(
-              { type: 'extra_moves', amount: 5 },
+            rewardedAdService.showRewardedAd(
+              {
+                type: 'moves',
+                amount: 5,
+                title: '+5 Extra Moves',
+                description: 'Watch a short video to receive +5 Extra Moves and continue this level!',
+              },
               () => {
                 setMovesRemaining(prev => prev + 5);
                 setKingMood('happy');

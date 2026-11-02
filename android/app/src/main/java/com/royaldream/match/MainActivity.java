@@ -11,11 +11,11 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize Google Mobile Ads SDK
+        // Initialize Google Mobile Ads SDK asynchronously
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
-                // AdMob initialized
+                // AdMob initialization completed
             }
         });
     }
