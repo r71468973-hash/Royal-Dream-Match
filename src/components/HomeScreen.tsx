@@ -8,6 +8,7 @@ import { PlayerState } from '../types/game';
 import { KingAvatar } from './KingAvatar';
 import { RoyalLogo } from './RoyalLogo';
 import { sound } from '../game/sound';
+import { loadPlayerState } from '../game/storage';
 import { AdMobBanner } from './AdMobBanner';
 import { rewardedAdService } from '../services/rewardedAdService';
 import { ApkDownloadModal } from './ApkDownloadModal';
@@ -338,9 +339,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </div>
 
-      {/* Google AdMob Banner at Bottom */}
+      {/* Google AdMob Advertisement Display Section at Bottom */}
       <div className="relative z-10 w-full mt-1 shrink-0">
-        <AdMobBanner />
+        <AdMobBanner onRewardReceived={() => onUpdateState(loadPlayerState())} />
       </div>
 
       {/* APK Modal */}

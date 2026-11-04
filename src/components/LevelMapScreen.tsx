@@ -212,7 +212,7 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
         </div>
       </div>
 
-      {/* Google AdMob Banner at Bottom */}
+      {/* Google AdMob Advertisement Display Section at Bottom */}
       <div className="relative z-10 w-full shrink-0">
         <AdMobBanner />
       </div>
