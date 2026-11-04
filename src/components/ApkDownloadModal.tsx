@@ -343,7 +343,7 @@ Download Royal Dream Match today and become the true Crown Master of the Kingdom
                 </div>
                 <div className="flex justify-between py-0.5 border-b border-purple-800/50">
                   <span className="text-purple-300">Contains Ads:</span>
-                  <span className="font-bold text-emerald-400">Yes (AdMob Banner)</span>
+                  <span className="font-bold text-emerald-400">Yes (Banner, Interstitial & Rewarded)</span>
                 </div>
                 <div className="flex justify-between py-0.5">
                   <span className="text-purple-300">Purpose:</span>

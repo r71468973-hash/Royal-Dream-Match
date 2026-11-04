@@ -4,4 +4,10 @@
     <string name="title_activity_main">Royal Dream Match</string>
     <string name="package_name">com.royaldream.match</string>
     <string name="custom_url_scheme">com.royaldream.match</string>
+
+    <!-- Internal Google AdMob Configuration (Kept strictly on Android Native) -->
+    <string name="admob_app_id">ca-app-pub-4935356006715377~4516913124</string>
+    <string name="admob_banner_unit_id">ca-app-pub-4935356006715377/9653779021</string>
+    <string name="admob_interstitial_unit_id">ca-app-pub-4935356006715377/2028450772</string>
+    <string name="admob_rewarded_unit_id">ca-app-pub-4935356006715377/5224354917</string>
 </resources>

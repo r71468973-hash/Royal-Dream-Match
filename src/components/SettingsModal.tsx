@@ -8,16 +8,8 @@ import { PlayerState } from '../types/game';
 import { sound } from '../game/sound';
 import { resetPlayerProgress } from '../game/storage';
 import { otaService, OtaState } from '../services/otaService';
-import { 
-  PRODUCTION_ADMOB_APP_ID, 
-  PRODUCTION_BANNER_UNIT_ID, 
-  GOOGLE_TEST_BANNER_UNIT_ID,
-  PRODUCTION_REWARDED_UNIT_ID,
-  GOOGLE_TEST_REWARDED_UNIT_ID,
-  ADMOB_CONFIG 
-} from '../config/admob';
 import { rewardedAdService } from '../services/rewardedAdService';
-import { AdMobBanner } from './AdMobBanner';
+import { interstitialAdService } from '../services/interstitialAdService';
 import { ApkDownloadModal } from './ApkDownloadModal';
 
 interface SettingsModalProps {
@@ -40,11 +32,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [showApkModal, setShowApkModal] = useState(false);
   const [rewardToast, setRewardToast] = useState<string | null>(null);
 
-  // AdMob Test/Live Mode toggle in UI
-  const [isTestMode, setIsTestMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('rdm_force_live_admob');
-    return saved === 'true' ? false : ADMOB_CONFIG.isTestMode;
-  });
+
 
   // OTA Updates Local State
   const [otaState, setOtaState] = useState<OtaState>(() => otaService.getState());
@@ -96,14 +84,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
-  const handleToggleAdmobMode = () => {
-    sound.playTap();
-    const next = !isTestMode;
-    setIsTestMode(next);
-    localStorage.setItem('rdm_force_live_admob', next ? 'false' : 'true');
-    setRewardToast(next ? 'Switched to Google Sample Test Ads' : 'Switched to Live Production Ad Unit!');
-    setTimeout(() => setRewardToast(null), 3000);
-  };
 
   const handleCheckOta = async () => {
     sound.playTap();
@@ -189,7 +169,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 : 'text-amber-200/80 hover:text-white'
             }`}
           >
-            AdMob
+            Rewards
           </button>
           <button
             onClick={() => {
@@ -367,122 +347,123 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>PLAY STORE HUB & DOWNLOADS</span>
             </button>
 
-            {/* AdMob Mode Switcher */}
-            <div className="p-3 rounded-2xl bg-[#1b0830]/80 border border-amber-400/30 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-black text-amber-200 text-xs">AdMob Banner Mode</div>
-                  <div className="text-[10px] text-purple-300">
-                    {isTestMode ? 'Using Google Sample Test Ads' : 'Using Live Production Ad Unit'}
+            {/* Watch Video & Earn Rewards Panel (No IDs exposed) */}
+            <div className="p-3.5 rounded-2xl bg-[#1b0830]/90 border border-amber-400/40 flex flex-col gap-3 shadow-inner">
+              <div className="flex items-center justify-between border-b border-purple-800/60 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎬</span>
+                  <div className="text-left">
+                    <div className="font-black text-amber-200 text-xs">Watch Video & Earn Rewards</div>
+                    <div className="text-[10px] text-purple-300">
+                      Official Google Mobile Ads Network
+                    </div>
                   </div>
                 </div>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 border border-emerald-400 text-emerald-300">
+                  Ad Ready
+                </span>
+              </div>
+
+              {/* Reward Action Buttons */}
+              <div className="flex flex-col gap-2">
+                {/* Watch Video (+100 Coins) */}
                 <button
-                  onClick={handleToggleAdmobMode}
-                  className={`px-3 py-1 rounded-full text-[10px] font-black border transition-colors ${
-                    isTestMode
-                      ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
-                      : 'bg-amber-500/20 border-amber-400 text-yellow-300'
-                  }`}
+                  onClick={() => {
+                    sound.playTap();
+                    setRewardToast('Loading video ad...');
+                    rewardedAdService.showRewardedAd(
+                      {
+                        type: 'coins',
+                        amount: 100,
+                        title: '100 Gold Coins',
+                        description: 'Watch video to earn 100 Gold Coins',
+                      },
+                      () => {
+                        onUpdateState({
+                          ...playerState,
+                          coins: playerState.coins + 100,
+                        });
+                        setRewardToast('🎉 +100 Coins Received!');
+                        setTimeout(() => setRewardToast(null), 3000);
+                      },
+                      (errorMsg) => {
+                        setRewardToast(errorMsg || 'Ad not available. Please try again.');
+                        setTimeout(() => setRewardToast(null), 3000);
+                      }
+                    );
+                  }}
+                  className="w-full py-3 px-3 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:to-yellow-400 border-2 border-yellow-200 text-purple-950 font-black text-xs uppercase tracking-wider shadow-[0_3px_0_#92400e] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-between cursor-pointer"
                 >
-                  {isTestMode ? 'TEST MODE' : 'LIVE MODE'}
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🪙</span>
+                    <span>Watch Video (+100 Coins)</span>
+                  </div>
+                  <span className="text-[10px] bg-purple-950/20 px-2 py-0.5 rounded-md font-extrabold">
+                    FREE
+                  </span>
+                </button>
+
+                {/* Watch Video (+1 Life) */}
+                <button
+                  onClick={() => {
+                    sound.playTap();
+                    if (playerState.lives >= playerState.maxLives) {
+                      setRewardToast('Royal Lives are full (5/5)!');
+                      setTimeout(() => setRewardToast(null), 2500);
+                      return;
+                    }
+                    setRewardToast('Loading video ad...');
+                    rewardedAdService.showRewardedAd(
+                      {
+                        type: 'lives',
+                        amount: 1,
+                        title: 'Extra Royal Life',
+                        description: 'Watch video to restore 1 Life',
+                      },
+                      () => {
+                        onUpdateState({
+                          ...playerState,
+                          lives: Math.min(playerState.maxLives, playerState.lives + 1),
+                        });
+                        setRewardToast('🎉 +1 Life Restored!');
+                        setTimeout(() => setRewardToast(null), 3000);
+                      },
+                      (errorMsg) => {
+                        setRewardToast(errorMsg || 'Ad not available. Please try again.');
+                        setTimeout(() => setRewardToast(null), 3000);
+                      }
+                    );
+                  }}
+                  className="w-full py-3 px-3 rounded-2xl bg-gradient-to-r from-rose-500 via-red-600 to-rose-700 hover:from-rose-400 hover:to-red-500 border-2 border-rose-300 text-white font-black text-xs uppercase tracking-wider shadow-[0_3px_0_#881337] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-between cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">❤️</span>
+                    <span>Watch Video (+1 Royal Life)</span>
+                  </div>
+                  <span className="text-[10px] bg-black/20 px-2 py-0.5 rounded-md font-extrabold">
+                    {playerState.lives}/{playerState.maxLives}
+                  </span>
+                </button>
+
+                {/* Natural Break Interstitial */}
+                <button
+                  onClick={() => {
+                    sound.playTap();
+                    setRewardToast('Loading ad...');
+                    interstitialAdService.showInterstitial(() => {
+                      setRewardToast(null);
+                    });
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-purple-900/60 hover:bg-purple-800 border border-purple-500/60 text-purple-200 font-bold text-xs uppercase tracking-wider active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>📺</span>
+                  <span>Test Interstitial Ad (Natural Break)</span>
                 </button>
               </div>
 
-              {/* Verified IDs Summary */}
-              <div className="pt-2 border-t border-purple-800/60 flex flex-col gap-1 text-[10px]">
-                <div className="flex justify-between py-0.5 border-b border-purple-800/40">
-                  <span className="text-purple-300">AdMob App ID:</span>
-                  <span className="font-mono text-amber-200 text-[9px] truncate max-w-[190px]">
-                    {PRODUCTION_ADMOB_APP_ID}
-                  </span>
-                </div>
-                <div className="flex justify-between py-0.5 border-b border-purple-800/40">
-                  <span className="text-purple-300">Banner Unit ID:</span>
-                  <span className="font-mono text-emerald-300 text-[9px] truncate max-w-[190px]">
-                    {isTestMode ? GOOGLE_TEST_BANNER_UNIT_ID : PRODUCTION_BANNER_UNIT_ID}
-                  </span>
-                </div>
-                <div className="flex justify-between py-0.5 border-b border-purple-800/40">
-                  <span className="text-purple-300">Rewarded Unit ID:</span>
-                  <span className="font-mono text-amber-200 text-[9px] truncate max-w-[190px]">
-                    {isTestMode ? GOOGLE_TEST_REWARDED_UNIT_ID : PRODUCTION_REWARDED_UNIT_ID}
-                  </span>
-                </div>
-                <div className="flex justify-between py-0.5">
-                  <span className="text-purple-300">Active Mode:</span>
-                  <span className="font-bold text-emerald-400">
-                    {isTestMode ? 'Official Sample Test Ads' : 'Live Production IDs'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Rewarded Ad Test Buttons */}
-              <div className="pt-2 border-t border-purple-800/60 flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-amber-300">Test Rewarded Video Ads:</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      sound.playTap();
-                      rewardedAdService.showRewardedAd(
-                        {
-                          type: 'coins',
-                          amount: 100,
-                          title: '100 Gold Coins',
-                          description: 'Sample test rewarded video ad for royal treasury coins.',
-                        },
-                        () => {
-                          onUpdateState({
-                            ...playerState,
-                            coins: playerState.coins + 100,
-                          });
-                          setRewardToast('🎉 +100 Coins Received!');
-                          setTimeout(() => setRewardToast(null), 3000);
-                        }
-                      );
-                    }}
-                    className="py-1.5 px-2 rounded-xl bg-purple-900/90 hover:bg-purple-800 border border-purple-600 text-[10px] font-bold text-amber-200 flex items-center justify-center gap-1 active:scale-95 transition-transform"
-                  >
-                    <span>🎬 🪙</span>
-                    <span>Test +100 Coins</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      sound.playTap();
-                      rewardedAdService.showRewardedAd(
-                        {
-                          type: 'lives',
-                          amount: 1,
-                          title: 'Extra Royal Life',
-                          description: 'Sample test rewarded video ad for extra life.',
-                        },
-                        () => {
-                          onUpdateState({
-                            ...playerState,
-                            lives: Math.min(playerState.maxLives, playerState.lives + 1),
-                          });
-                          setRewardToast('🎉 +1 Life Restored!');
-                          setTimeout(() => setRewardToast(null), 3000);
-                        }
-                      );
-                    }}
-                    className="py-1.5 px-2 rounded-xl bg-purple-900/90 hover:bg-purple-800 border border-purple-600 text-[10px] font-bold text-rose-200 flex items-center justify-center gap-1 active:scale-95 transition-transform"
-                  >
-                    <span>🎬 ❤️</span>
-                    <span>Test +1 Life</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Live Banner Preview */}
-            <div className="bg-[#1b0830]/80 rounded-2xl p-2.5 border border-amber-400/30 flex flex-col gap-1.5">
-              <span className="font-bold text-amber-300 text-[10px] uppercase tracking-wider">
-                Banner Ad Preview (Non-Intrusive 50px):
-              </span>
-              <AdMobBanner forceTestMode={isTestMode} />
-              <p className="text-[9px] text-purple-300 leading-tight">
-                Docked at the bottom of the screen with fixed safe-padding so game controls, boosters, and gem swaps are never blocked.
+              {/* Status Note */}
+              <p className="text-[10px] text-purple-300/80 text-center mt-1 leading-relaxed">
+                Powered by Google Mobile Ads SDK. Rewards are credited immediately after full video completion.
               </p>
             </div>
           </div>

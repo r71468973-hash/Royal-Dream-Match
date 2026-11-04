@@ -87,7 +87,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         type: 'coins',
         amount: 100,
         title: '100 Gold Coins',
-        description: 'Watch a short video to claim +100 Royal Gold Coins!',
+        description: 'Watch a video to claim +100 Royal Gold Coins!',
       },
       () => {
         sound.playCoin();
@@ -99,6 +99,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           title: 'Coins Received!',
           message: '+100 Royal Gold Coins have been added to your treasury!',
           icon: '🪙',
+        });
+      },
+      (errorMsg) => {
+        setAlertState({
+          title: 'Ad Notice',
+          message: errorMsg || 'Ad not available. Please try again.',
+          icon: 'ℹ️',
         });
       }
     );
@@ -120,7 +127,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         type: 'lives',
         amount: 1,
         title: 'Extra Royal Life',
-        description: 'Watch a short video to restore +1 Royal Heart!',
+        description: 'Watch a video to restore +1 Royal Heart!',
       },
       () => {
         const nextLives = Math.min(playerState.maxLives, playerState.lives + 1);
@@ -132,6 +139,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           title: 'Life Restored!',
           message: '+1 Royal Life has been replenished!',
           icon: '❤️',
+        });
+      },
+      (errorMsg) => {
+        setAlertState({
+          title: 'Ad Notice',
+          message: errorMsg || 'Ad not available. Please try again.',
+          icon: 'ℹ️',
         });
       }
     );

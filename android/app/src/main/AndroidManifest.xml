@@ -34,10 +34,10 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Google AdMob Application ID -->
+        <!-- Google AdMob Application ID (Internal Android Config) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-4935356006715377~4516913124" />
+            android:value="@string/admob_app_id" />
     </application>
 
     <!-- Permissions -->

@@ -10,8 +10,8 @@
 ## 1. Introduction
 This Privacy Policy describes how **Royal Dream Match** ("we", "our", or "the app") handles player information. We value your privacy and are committed to ensuring clear, transparent data practices compliant with Google Play Policies.
 
-## 2. Google AdMob Banner & Rewarded Advertisements
-The app uses **Google AdMob (Google Mobile Ads SDK)** to serve non-intrusive banner advertisements and opt-in rewarded video advertisements (for players to optionally watch videos for extra coins, lives, or moves). AdMob may process device identifiers (such as Google Advertising ID / GAID), IP address, and diagnostic crash logs in accordance with [Google's Privacy Policy](https://policies.google.com/privacy). Advertisements do not obstruct gameplay or interactive controls.
+## 2. Google AdMob Advertisements (Banner, Interstitial & Rewarded)
+The app uses **Google AdMob (Google Mobile Ads SDK)** to serve non-intrusive banner advertisements, interstitial advertisements shown strictly at natural breaks (such as after a completed level), and opt-in rewarded video advertisements (for players to optionally watch videos for extra coins, lives, or moves). Advertisements are never displayed during active puzzle gameplay. AdMob may process device identifiers (such as Google Advertising ID / GAID), IP address, and diagnostic crash logs in accordance with [Google's Privacy Policy](https://policies.google.com/privacy).
 
 ## 3. Information Collected & Used
 - **Personal Information:** We do NOT collect, transmit, or sell any personal information such as your name, email address, phone number, or physical location.

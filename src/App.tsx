@@ -16,8 +16,8 @@ import { DailyRewardsModal } from './components/DailyRewardsModal';
 import { SettingsModal } from './components/SettingsModal';
 import { LiveUpdateModal } from './components/LiveUpdateModal';
 import { otaService, OtaState } from './services/otaService';
-import { AdMobRewardedModal } from './components/AdMobRewardedModal';
-import { rewardedAdService, RewardedAdState } from './services/rewardedAdService';
+import { rewardedAdService } from './services/rewardedAdService';
+import { interstitialAdService } from './services/interstitialAdService';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('splash');
@@ -27,7 +27,7 @@ export default function App() {
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [otaState, setOtaState] = useState<OtaState>(() => otaService.getState());
   const [showOtaModal, setShowOtaModal] = useState<boolean>(false);
-  const [rewardedAdState, setRewardedAdState] = useState<RewardedAdState>(() => rewardedAdService.getState());
+
 
   // Sync sound settings with SoundManager
   useEffect(() => {
@@ -44,13 +44,8 @@ export default function App() {
       }
     });
 
-    const unsubscribeRewarded = rewardedAdService.subscribe((state) => {
-      setRewardedAdState(state);
-    });
-
     return () => {
       unsubscribeOta();
-      unsubscribeRewarded();
     };
   }, []);
 
@@ -97,6 +92,9 @@ export default function App() {
 
     handleUpdatePlayerState(updatedState);
     setActivePlayingLevel(nextCurrentLevel);
+
+    // Natural Break: Load and show interstitial ad after completed level
+    interstitialAdService.showInterstitial();
   };
 
   // Level Fail Handler (deducts 1 life)
@@ -109,10 +107,11 @@ export default function App() {
     };
     handleUpdatePlayerState(updatedState);
 
-    // If still have lives, restart level, else back to home
+    // If still have lives, restart level, else back to home with natural break interstitial
     if (nextLives > 0) {
       setActivePlayingLevel(levelNumber);
     } else {
+      interstitialAdService.showInterstitial();
       setCurrentScreen('home');
     }
   };
@@ -187,15 +186,6 @@ export default function App() {
           />
         )}
 
-        {/* AdMob Rewarded Video Ad Modal */}
-        {rewardedAdState.active && rewardedAdState.reward && (
-          <AdMobRewardedModal
-            reward={rewardedAdState.reward}
-            countdown={rewardedAdState.countdown}
-            status={rewardedAdState.status}
-            onClose={() => rewardedAdService.cancelRewardedAd()}
-          />
-        )}
       </div>
     </div>
   );

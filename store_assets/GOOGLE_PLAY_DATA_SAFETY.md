@@ -8,7 +8,7 @@ Follow these exact answers when completing the **Data Safety** questionnaire in 
 
 | Question | Answer | Reason |
 | :--- | :--- | :--- |
-| **Does your app collect or share any of the required user data types?** | **Yes** | Google Mobile Ads SDK (AdMob) processes advertising device identifiers for banner and rewarded video ad delivery. |
+| **Does your app collect or share any of the required user data types?** | **Yes** | Google Mobile Ads SDK (AdMob) processes advertising device identifiers for banner, interstitial, and rewarded video ad delivery. |
 | **Is all of the user data collected by your app encrypted in transit?** | **Yes** | Google AdMob uses HTTPS / TLS encryption for all ad requests and SDK transmissions. |
 | **Do you provide a way for users to request that their data be deleted?** | **Yes** | Users can reset game progress in Settings > Reset Progress, or delete app data via Android Settings. |
 

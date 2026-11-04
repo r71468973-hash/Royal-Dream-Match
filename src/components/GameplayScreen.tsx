@@ -989,12 +989,19 @@ export const GameplayScreen: React.FC<GameplayScreenProps> = ({
                 type: 'moves',
                 amount: 5,
                 title: '+5 Extra Moves',
-                description: 'Watch a short video to receive +5 Extra Moves and continue this level!',
+                description: 'Watch video to receive +5 Extra Moves',
               },
               () => {
                 setMovesRemaining(prev => prev + 5);
                 setKingMood('happy');
                 setShowFailed(false);
+              },
+              (errorMsg) => {
+                setAlertState({
+                  title: 'Ad Notice',
+                  message: errorMsg || 'Ad not available. Please try again.',
+                  icon: 'ℹ️',
+                });
               }
             );
           }}
